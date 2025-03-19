@@ -2,6 +2,10 @@ import numpy as np
 import time
 import logging
 import numpy as np
+import torch
+import matplotlib.pyplot as plt
+import os
+from datetime import datetime
 
 from tqdm import tqdm
 from PIL import Image
@@ -21,6 +25,13 @@ logging.basicConfig(
     ]
 )
 
+# Configure device
+if torch.backends.mps.is_available():
+    device = torch.device('mps')
+    logging.info("Using Apple Silicon optimized Metal Performance Shaders (MPS) backend.")
+else:
+    device = torch.device('cpu')
+    logging.info("MPS not available. Falling back to CPU.")
 
 class HatefulMemesDataset:
     def __init__(self, dataset, vocab, config, is_train=True):
@@ -76,6 +87,10 @@ class DataLoader:
         self.shuffle = shuffle
         self.indices = np.arange(len(dataset))
         
+    def __len__(self):
+        """Return the number of batches in the dataset"""
+        return (len(self.dataset) + self.batch_size - 1) // self.batch_size
+    
     def __iter__(self):
         if self.shuffle:
             np.random.shuffle(self.indices)
@@ -110,32 +125,70 @@ def build_vocab(dataset, max_vocab=10000):
         vocab[word] = len(vocab)
     return vocab
 
-def train():
+def safe_to_numpy(x):
+    """Safely convert tensors to NumPy arrays regardless of device"""
+    if isinstance(x, torch.Tensor):
+        return x.detach().cpu().numpy()
+    return x
+
+def train(model_config=None):
     # Load dataset
     ds = load_dataset("Multimodal-Fatima/Hatefulmemes_train")
     train_val = ds['train'].train_test_split(test_size=0.2)
     train_data = train_val['train']
     val_data = train_val['test']
     
-    # Build vocabulary
-    vocab = build_vocab(train_data)
+    # First, balance the dataset to have 3000 entries for each label
+    hateful = [i for i, item in enumerate(train_data) if item['label'] == 1]
+    non_hateful = [i for i, item in enumerate(train_data) if item['label'] == 0]
     
-    # Model configurations
-    config = {
-        'img_size': 64,
-        'grayscale': False,
-        'num_conv_blocks': 2,
-        'num_kernels': 32
-    }
+    # Sample 3000 from each class (or all if less than 3000)
+    sample_size = min(3000, len(hateful), len(non_hateful))
+    hateful_indices = np.random.choice(hateful, size=sample_size, replace=False)
+    non_hateful_indices = np.random.choice(non_hateful, size=sample_size, replace=False)
+    
+    # Combine the balanced indices and create a new balanced dataset
+    balanced_indices = np.concatenate([hateful_indices, non_hateful_indices])
+    balanced_train_data = train_data.select(balanced_indices)
+    
+    # For faster training - use 50% of the balanced data
+    sample_ratio = 0.5  # Use 50% of data (increased from 25%)
+    train_size = int(len(balanced_train_data) * sample_ratio)
+    val_size = int(len(val_data) * sample_ratio)
+    train_indices = np.random.choice(len(balanced_train_data), size=train_size, replace=False)
+    val_indices = np.random.choice(len(val_data), size=val_size, replace=False)
+    train_data = balanced_train_data.select(train_indices)
+    val_data = val_data.select(val_indices)
+    
+    # Log dataset statistics
+    logging.info(f"Original dataset size: {len(train_data)} training, {len(val_data)} validation")
+    logging.info(f"After balancing: {len(balanced_train_data)} training samples (equal class distribution)")
+    logging.info(f"Final dataset size: {len(train_data)} training, {len(val_data)} validation")
+    
+    # Build vocabulary with smaller size
+    vocab = build_vocab(train_data, max_vocab=8000)  # Reduced from 10000
+    
+    # Use provided model config or default
+    if model_config is None:
+        model_config = {
+            'img_size': 32,
+            'grayscale': True,
+            'num_conv_blocks': 2,
+            'num_kernels': 32
+        }
     
     # Create datasets
-    train_dataset = HatefulMemesDataset(train_data, vocab, config)
-    val_dataset = HatefulMemesDataset(val_data, vocab, config, is_train=False)
+    train_dataset = HatefulMemesDataset(train_data, vocab, model_config)
+    val_dataset = HatefulMemesDataset(val_data, vocab, model_config, is_train=False)
     
     # Create models
-    image_cnn = ImageCNN(config)
+    image_cnn = ImageCNN(model_config)
     text_cnn = TextCNN(len(vocab))
     model = MultimodalModel(image_cnn, text_cnn)
+
+    # Ensure all model parameters and tensors are moved to the correct device
+    model.image_model.device = device
+    model.text_model.device = device
     
     logging.info("\nModel Architectures:")
     logging.info("Image CNN Architecture:")
@@ -145,9 +198,9 @@ def train():
     logging.info("\nStarting training...")
         
     # Training parameters
-    batch_size = 64
-    epochs = 10
-    lr = 0.001
+    batch_size = 128  # Increased from 64
+    epochs = 5  # Reduced from 5
+    lr = 0.01
     loss_fn = CrossEntropy()
     
     # Create data loaders
@@ -159,9 +212,19 @@ def train():
     logger.info(f"Epochs: {epochs}")
     logger.info(f"Batch size: {batch_size}")
     logger.info(f"Learning rate: {lr}")
-    logger.info(f"Image size: {config['img_size']}")
-    logger.info(f"Conv blocks: {config['num_conv_blocks']}")
+    logger.info(f"Image size: {model_config['img_size']}")
+    logger.info(f"Conv blocks: {model_config['num_conv_blocks']}")
+    logger.info(f"Grayscale: {model_config['grayscale']}")
+    logger.info(f"Num kernels: {model_config['num_kernels']}")
+    logger.info(f"Using {sample_ratio*100:.0f}% of dataset: {train_size} training, {val_size} validation samples")
 
+    # Track metrics per epoch for plotting
+    train_losses = []
+    val_losses = []
+    train_accs = []
+    val_accs = []
+    epoch_times = []
+    
     # Training loop
     for epoch in range(epochs):
         epoch_start = time.time()
@@ -174,29 +237,31 @@ def train():
         logger.info(f"\nEpoch {epoch+1}/{epochs}")
 
         for batch_idx, (images, texts, labels) in enumerate(tqdm(train_loader, desc="Training")):
-            # Forward pass
-            preds = model.forward(images, texts)
-            loss = loss_fn.eval(labels, preds)
+            # Convert inputs to tensors on the right device
+            images = torch.tensor(images).to(device)
+            texts = torch.tensor(texts).to(device)
+            labels = torch.tensor(labels).to(device)
+            
+            # Forward pass - ensure we're passing CPU numpy arrays where needed
+            preds = model.forward(safe_to_numpy(images), safe_to_numpy(texts))
+            labels_np = safe_to_numpy(labels)
+            preds_np = safe_to_numpy(preds)
+            loss = loss_fn.eval(labels_np, preds_np)
             train_loss += loss
             
-            # Backward pass
-            grad = loss_fn.gradient(labels, preds)
+            # Backward pass with numpy arrays
+            grad = loss_fn.gradient(labels_np, preds_np)
             model.backward(grad)
-
+            
             # Update weights
             model.fc.updateWeights(lr)
             model.image_model.update_weights(lr)
             model.text_model.update_weights(lr)
-
-            # Calculate metrics
-            correct += ((preds > 0.5) == labels).sum()
+            
+            # Calculate metrics - properly move to CPU before NumPy conversion
+            correct += ((preds_np > 0.5) == labels_np).sum()
             total += labels.shape[0]
-            
-            # Batch logging
-            if (batch_idx + 1) % 50 == 0:
-                batch_acc = correct / total
-                logger.debug(f"Batch {batch_idx+1} | Loss: {loss:.4f} | Acc: {batch_acc:.2f}")
-            
+
         # Validation phase
         val_start = time.time()
         val_loss = 0
@@ -205,9 +270,15 @@ def train():
         
         model.eval()
         for images, texts, labels in tqdm(val_loader, desc="Validation"):
-            preds = model.forward(images, texts)
-            val_loss += loss_fn.eval(labels, preds)
-            val_correct += ((preds > 0.5) == labels).sum()
+            images = torch.tensor(images).to(device)
+            texts = torch.tensor(texts).to(device)
+            labels = torch.tensor(labels).to(device)
+            
+            preds = model.forward(safe_to_numpy(images), safe_to_numpy(texts))
+            labels_np = safe_to_numpy(labels)
+            preds_np = safe_to_numpy(preds)
+            val_loss += loss_fn.eval(labels_np, preds_np)
+            val_correct += ((preds_np > 0.5) == labels_np).sum()
             val_total += labels.shape[0]
         
         # Epoch statistics
@@ -217,11 +288,149 @@ def train():
         val_acc = val_correct / val_total
         epoch_duration = time.time() - epoch_start
         
+        # Store metrics for plotting
+        train_losses.append(avg_train_loss)
+        train_accs.append(train_acc)
+        val_losses.append(avg_val_loss)
+        val_accs.append(val_acc)
+        epoch_times.append(epoch_duration)
+        
         logger.info(f"\nEpoch {epoch+1} Summary:")
         logger.info(f"Duration: {epoch_duration:.2f}s")
         logger.info(f"Train Loss: {avg_train_loss:.4f} | Acc: {train_acc:.2%}")
         logger.info(f"Val Loss: {avg_val_loss:.4f} | Acc: {val_acc:.2%}")
         logger.info("-" * 50)
+    
+    # Return final validation metrics
+    final_metrics = {
+        'val_loss': avg_val_loss,
+        'val_accuracy': val_acc,
+        'train_loss': avg_train_loss, 
+        'train_accuracy': train_acc,
+        'epoch_duration': epoch_duration,
+        'all_train_losses': train_losses,
+        'all_val_losses': val_losses,
+        'all_train_accs': train_accs,
+        'all_val_accs': val_accs,
+        'all_epoch_times': epoch_times
+    }
+    
+    return final_metrics
+
+def plot_experiment_results(results, output_dir="experiment_plots"):
+    """Plot the training and validation accuracies for all experiments"""
+    # Create output directory if it doesn't exist
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Get current timestamp for filenames
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    # Plot training and validation accuracies for each experiment
+    plt.figure(figsize=(12, 8))
+    
+    for name, metrics in results.items():
+        epochs = range(1, len(metrics['all_train_accs']) + 1)
+        plt.plot(epochs, metrics['all_train_accs'], '-o', label=f"{name} (Train)")
+        plt.plot(epochs, metrics['all_val_accs'], '-s', label=f"{name} (Val)")
+    
+    plt.title('Model Accuracy over Epochs')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.grid(True)
+    plt.legend(loc='lower right')
+    plt.tight_layout()
+    
+    # Save the figure
+    plt.savefig(f"{output_dir}/accuracy_comparison_{timestamp}.png", dpi=300)
+    logging.info(f"Saved accuracy plot to {output_dir}/accuracy_comparison_{timestamp}.png")
+    
+    # Plot training and validation losses for each experiment
+    plt.figure(figsize=(12, 8))
+    
+    for name, metrics in results.items():
+        epochs = range(1, len(metrics['all_train_losses']) + 1)
+        plt.plot(epochs, metrics['all_train_losses'], '-o', label=f"{name} (Train)")
+        plt.plot(epochs, metrics['all_val_losses'], '-s', label=f"{name} (Val)")
+    
+    plt.title('Model Loss over Epochs')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.grid(True)
+    plt.legend(loc='upper right')
+    plt.tight_layout()
+    
+    # Save the figure
+    plt.savefig(f"{output_dir}/loss_comparison_{timestamp}.png", dpi=300)
+    logging.info(f"Saved loss plot to {output_dir}/loss_comparison_{timestamp}.png")
+    
+    # Also plot individual experiment metrics for clearer visualization
+    for name, metrics in results.items():
+        plt.figure(figsize=(10, 6))
+        epochs = range(1, len(metrics['all_train_accs']) + 1)
+        
+        plt.plot(epochs, metrics['all_train_accs'], '-o', label='Training Accuracy')
+        plt.plot(epochs, metrics['all_val_accs'], '-s', label='Validation Accuracy')
+        
+        plt.title(f'Model Accuracy: {name}')
+        plt.xlabel('Epoch')
+        plt.ylabel('Accuracy')
+        plt.ylim([0, 1])
+        plt.grid(True)
+        plt.legend()
+        
+        # Save the figure
+        plt.savefig(f"{output_dir}/{name}_accuracy_{timestamp}.png", dpi=300)
+        logging.info(f"Saved {name} accuracy plot to {output_dir}/{name}_accuracy_{timestamp}.png")
 
 if __name__ == "__main__":
-    train()
+    # Define experiments to run
+    experiments = [
+        {"name": "Grayscale_SimpleCNN", "grayscale": True, "num_kernels": 8, "num_conv_blocks": 1},
+        {"name": "RGB_SimpleCNN", "grayscale": False, "num_kernels": 8, "num_conv_blocks": 1},
+        {"name": "Grayscale_MultiKernel", "grayscale": True, "num_kernels": 32, "num_conv_blocks": 1},
+        {"name": "RGB_DeepCNN", "grayscale": False, "num_kernels": 16, "num_conv_blocks": 3}
+    ]
+
+    # Results dictionary
+    results = {}
+
+    for config in experiments:
+        logging.info(f"\n======= Starting experiment: {config['name']} =======")
+        # Set up the configuration
+        model_config = {
+            'img_size': 64,
+            'grayscale': config['grayscale'],
+            'num_conv_blocks': config['num_conv_blocks'], 
+            'num_kernels': config['num_kernels']
+        }
+        
+        # Train and evaluate with this configuration
+        metrics = train(model_config)
+        
+        # Store results
+        results[config['name']] = metrics
+        
+        logging.info(f"\n======= Results for {config['name']} =======")
+        logging.info(f"Validation Accuracy: {metrics['val_accuracy']:.2%}")
+        logging.info(f"Validation Loss: {metrics['val_loss']:.4f}")
+        logging.info(f"Training Accuracy: {metrics['train_accuracy']:.2%}")
+        logging.info(f"Training Loss: {metrics['train_loss']:.4f}")
+        logging.info(f"Epoch Duration: {metrics['epoch_duration']:.2f}s")
+        logging.info("="*50)
+        
+        # Log more detailed configuration info
+        logging.info(f"Configuration details:")
+        logging.info(f"  - Image size: {model_config['img_size']}px")
+        logging.info(f"  - Image format: {'Grayscale' if model_config['grayscale'] else 'RGB'}")
+        logging.info(f"  - CNN depth: {model_config['num_conv_blocks']} convolutional blocks")
+        logging.info(f"  - Kernels per layer: {model_config['num_kernels']}")
+    
+    # Print summary of all experiments
+    logging.info("\n======= EXPERIMENT SUMMARY =======")
+    for name, metrics in results.items():
+        logging.info(f"{name}: Val Acc={metrics['val_accuracy']:.2%}, Train Acc={metrics['train_accuracy']:.2%}, Time/epoch={sum(metrics['all_epoch_times'])/len(metrics['all_epoch_times']):.2f}s")
+    
+    # Generate plots
+    logging.info("\n======= Generating visualization plots =======")
+    plot_experiment_results(results)
+    logging.info("Visualization complete. Plots saved to 'experiment_plots' directory.")
