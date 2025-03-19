@@ -38,3 +38,7 @@ class MultimodalModel:
         self.fc.update_weights(lr)
         self.image_model.update_weights(lr)
         self.text_model.update_weights(lr)
+
+    def updateWeightsWithMomentum(self, learning_rate, beta1=0.9, beta2=0.999, epsilon=1e-8, momentum=None, velocity=None):
+        """Update weights of all components using Adam-like optimization"""
+        self.fc.updateWeightsWithMomentum(learning_rate, beta1, beta2, epsilon, momentum, velocity)

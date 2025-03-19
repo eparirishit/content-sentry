@@ -47,3 +47,11 @@ class ImageCNN:
         for layer in self.layers:
             if hasattr(layer, 'update_weights'):
                 layer.update_weights(lr)
+
+    def update_weights_with_momentum(self, learning_rate, beta1=0.9, beta2=0.999, epsilon=1e-8, momentum=None, velocity=None):
+        """Update all layer weights using Adam-like optimization"""
+        for layer in self.layers:
+            if hasattr(layer, 'updateWeightsWithMomentum'):
+                layer.updateWeightsWithMomentum(learning_rate, beta1, beta2, epsilon, momentum, velocity)
+            elif hasattr(layer, 'updateWeights'):  # Fallback for layers without momentum support
+                layer.updateWeights(learning_rate)
