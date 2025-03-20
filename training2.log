@@ -1,0 +1,802 @@
+2025-03-20 01:06:56,732 - INFO - Using Apple Silicon optimized Metal Performance Shaders (MPS) backend.
+2025-03-20 01:06:56,732 - INFO - 
+======= Starting experiment: Grayscale_DeepCNN =======
+2025-03-20 01:08:04,611 - INFO - Original dataset size: 800 training, 340 validation
+2025-03-20 01:08:04,612 - INFO - After balancing: 4000 training samples (equal class distribution)
+2025-03-20 01:08:04,612 - INFO - Final dataset size: 800 training, 340 validation
+2025-03-20 01:08:08,409 - INFO - 
+Model Architectures:
+2025-03-20 01:08:08,409 - INFO - Image CNN Architecture:
+2025-03-20 01:08:08,409 - INFO - [<framework.ConvolutionalLayer.ConvolutionalLayer object at 0x17e9a0500>, <framework.ReLULayer.ReLULayer object at 0x17c552a80>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x16dbef4d0>, <framework.ConvolutionalLayer.ConvolutionalLayer object at 0x16dbc4e90>, <framework.ReLULayer.ReLULayer object at 0x16dbc6060>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x16dbc58b0>, <framework.FlatteningLayer.FlatteningLayer object at 0x17b53acc0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x16dbabaa0>, <framework.ReLULayer.ReLULayer object at 0x17ea26ea0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x179c08920>]
+2025-03-20 01:08:08,409 - INFO - 
+Text CNN Architecture:
+2025-03-20 01:08:08,409 - INFO - [<framework.EmbeddingLayer.EmbeddingLayer object at 0x17fc93950>, <framework.TransposeLayer.TransposeLayer object at 0x17fc93aa0>, <framework.Conv1DLayer.Conv1DLayer object at 0x17fc90530>, <framework.ReLULayer.ReLULayer object at 0x17fc93920>, <framework.GlobalMaxPooling1DLayer.GlobalMaxPooling1DLayer object at 0x17fc92510>, <framework.FlatteningLayer.FlatteningLayer object at 0x17e9ea6c0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17fc93b30>]
+2025-03-20 01:08:08,409 - INFO - 
+Starting training...
+2025-03-20 01:08:08,409 - INFO - Starting training with:
+2025-03-20 01:08:08,410 - INFO - Epochs: 5
+2025-03-20 01:08:08,410 - INFO - Batch size: 96
+2025-03-20 01:08:08,410 - INFO - Learning rate: 0.01
+2025-03-20 01:08:08,410 - INFO - Image size: 48
+2025-03-20 01:08:08,410 - INFO - Conv blocks: 2
+2025-03-20 01:08:08,410 - INFO - Grayscale: True
+2025-03-20 01:08:08,410 - INFO - Num kernels: 32
+2025-03-20 01:08:08,410 - INFO - Using 20% of dataset: 800 training, 340 validation samples
+2025-03-20 01:08:08,410 - INFO - 
+Epoch 1/5
+2025-03-20 01:13:31,755 - INFO - 
+Epoch 1 Summary:
+2025-03-20 01:13:31,756 - INFO - Duration: 323.35s
+2025-03-20 01:13:31,756 - INFO - Train Loss: 0.7567 | Acc: 49.74%
+2025-03-20 01:13:31,756 - INFO - Val Loss: 0.5667 | Acc: 32.64%
+2025-03-20 01:13:31,756 - INFO - --------------------------------------------------
+2025-03-20 01:13:31,756 - INFO - 
+Epoch 2/5
+2025-03-20 01:18:54,666 - INFO - 
+Epoch 2 Summary:
+2025-03-20 01:18:54,666 - INFO - Duration: 322.91s
+2025-03-20 01:18:54,666 - INFO - Train Loss: 0.6659 | Acc: 52.60%
+2025-03-20 01:18:54,666 - INFO - Val Loss: 0.7015 | Acc: 32.99%
+2025-03-20 01:18:54,666 - INFO - --------------------------------------------------
+2025-03-20 01:18:54,666 - INFO - 
+Epoch 3/5
+2025-03-20 01:24:16,297 - INFO - 
+Epoch 3 Summary:
+2025-03-20 01:24:16,298 - INFO - Duration: 321.63s
+2025-03-20 01:24:16,298 - INFO - Train Loss: 0.6347 | Acc: 52.86%
+2025-03-20 01:24:16,298 - INFO - Val Loss: 0.4891 | Acc: 69.10%
+2025-03-20 01:24:16,298 - INFO - --------------------------------------------------
+2025-03-20 01:24:16,298 - INFO - Reducing learning rate to 0.005
+2025-03-20 01:24:16,298 - INFO - 
+Epoch 4/5
+2025-03-20 01:29:37,707 - INFO - 
+Epoch 4 Summary:
+2025-03-20 01:29:37,708 - INFO - Duration: 321.41s
+2025-03-20 01:29:37,708 - INFO - Train Loss: 0.6206 | Acc: 52.73%
+2025-03-20 01:29:37,708 - INFO - Val Loss: 0.5686 | Acc: 35.07%
+2025-03-20 01:29:37,708 - INFO - --------------------------------------------------
+2025-03-20 01:29:37,708 - INFO - 
+Epoch 5/5
+2025-03-20 01:35:00,097 - INFO - 
+Epoch 5 Summary:
+2025-03-20 01:35:00,098 - INFO - Duration: 322.39s
+2025-03-20 01:35:00,098 - INFO - Train Loss: 0.6101 | Acc: 54.95%
+2025-03-20 01:35:00,098 - INFO - Val Loss: 0.5213 | Acc: 48.96%
+2025-03-20 01:35:00,098 - INFO - --------------------------------------------------
+2025-03-20 01:35:00,111 - INFO - 
+======= Results for Grayscale_DeepCNN =======
+2025-03-20 01:35:00,112 - INFO - Validation Accuracy: 48.96%
+2025-03-20 01:35:00,112 - INFO - Validation Loss: 0.5213
+2025-03-20 01:35:00,112 - INFO - Training Accuracy: 54.95%
+2025-03-20 01:35:00,112 - INFO - Training Loss: 0.6101
+2025-03-20 01:35:00,112 - INFO - Epoch Duration: 322.39s
+2025-03-20 01:35:00,112 - INFO - ==================================================
+2025-03-20 01:35:00,112 - INFO - Configuration details:
+2025-03-20 01:35:00,112 - INFO -   - Image size: 48px
+2025-03-20 01:35:00,112 - INFO -   - Image format: Grayscale
+2025-03-20 01:35:00,112 - INFO -   - CNN depth: 2 convolutional blocks
+2025-03-20 01:35:00,112 - INFO -   - Kernels per layer: 32
+2025-03-20 01:35:00,112 - INFO - 
+======= Starting experiment: RGB_DeepCNN =======
+2025-03-20 01:36:08,847 - INFO - Original dataset size: 800 training, 340 validation
+2025-03-20 01:36:08,847 - INFO - After balancing: 4000 training samples (equal class distribution)
+2025-03-20 01:36:08,847 - INFO - Final dataset size: 800 training, 340 validation
+2025-03-20 01:36:12,682 - INFO - 
+Model Architectures:
+2025-03-20 01:36:12,682 - INFO - Image CNN Architecture:
+2025-03-20 01:36:12,682 - INFO - [<framework.ConvolutionalLayer.ConvolutionalLayer object at 0x17fffd220>, <framework.ReLULayer.ReLULayer object at 0x17fffc8c0>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x17fffc950>, <framework.ConvolutionalLayer.ConvolutionalLayer object at 0x17fffc9e0>, <framework.ReLULayer.ReLULayer object at 0x17fffca70>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x17fffd160>, <framework.FlatteningLayer.FlatteningLayer object at 0x17fffc590>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17fffcad0>, <framework.ReLULayer.ReLULayer object at 0x17fffcb30>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17fffd100>]
+2025-03-20 01:36:12,682 - INFO - 
+Text CNN Architecture:
+2025-03-20 01:36:12,682 - INFO - [<framework.EmbeddingLayer.EmbeddingLayer object at 0x17fffd1c0>, <framework.TransposeLayer.TransposeLayer object at 0x17fffc800>, <framework.Conv1DLayer.Conv1DLayer object at 0x17fffd190>, <framework.ReLULayer.ReLULayer object at 0x17fffc860>, <framework.GlobalMaxPooling1DLayer.GlobalMaxPooling1DLayer object at 0x17fffcfe0>, <framework.FlatteningLayer.FlatteningLayer object at 0x17fffd070>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17fffd040>]
+2025-03-20 01:36:12,682 - INFO - 
+Starting training...
+2025-03-20 01:36:12,682 - INFO - Starting training with:
+2025-03-20 01:36:12,682 - INFO - Epochs: 5
+2025-03-20 01:36:12,682 - INFO - Batch size: 96
+2025-03-20 01:36:12,682 - INFO - Learning rate: 0.01
+2025-03-20 01:36:12,682 - INFO - Image size: 48
+2025-03-20 01:36:12,682 - INFO - Conv blocks: 2
+2025-03-20 01:36:12,682 - INFO - Grayscale: False
+2025-03-20 01:36:12,682 - INFO - Num kernels: 32
+2025-03-20 01:36:12,682 - INFO - Using 20% of dataset: 800 training, 340 validation samples
+2025-03-20 01:36:12,682 - INFO - 
+Epoch 1/5
+2025-03-20 01:41:36,647 - INFO - 
+Epoch 1 Summary:
+2025-03-20 01:41:36,647 - INFO - Duration: 323.96s
+2025-03-20 01:41:36,647 - INFO - Train Loss: 0.7875 | Acc: 50.78%
+2025-03-20 01:41:36,647 - INFO - Val Loss: 1.1175 | Acc: 30.56%
+2025-03-20 01:41:36,647 - INFO - --------------------------------------------------
+2025-03-20 01:41:36,647 - INFO - 
+Epoch 2/5
+2025-03-20 01:47:00,784 - INFO - 
+Epoch 2 Summary:
+2025-03-20 01:47:00,786 - INFO - Duration: 324.14s
+2025-03-20 01:47:00,786 - INFO - Train Loss: 0.8662 | Acc: 48.44%
+2025-03-20 01:47:00,786 - INFO - Val Loss: 0.5136 | Acc: 59.72%
+2025-03-20 01:47:00,786 - INFO - --------------------------------------------------
+2025-03-20 01:47:00,786 - INFO - 
+Epoch 3/5
+2025-03-20 01:52:24,757 - INFO - 
+Epoch 3 Summary:
+2025-03-20 01:52:24,757 - INFO - Duration: 323.97s
+2025-03-20 01:52:24,757 - INFO - Train Loss: 0.6494 | Acc: 48.31%
+2025-03-20 01:52:24,757 - INFO - Val Loss: 0.4744 | Acc: 69.44%
+2025-03-20 01:52:24,757 - INFO - --------------------------------------------------
+2025-03-20 01:52:24,757 - INFO - Reducing learning rate to 0.005
+2025-03-20 01:52:24,757 - INFO - 
+Epoch 4/5
+2025-03-20 01:57:49,374 - INFO - 
+Epoch 4 Summary:
+2025-03-20 01:57:49,375 - INFO - Duration: 324.62s
+2025-03-20 01:57:49,375 - INFO - Train Loss: 0.6269 | Acc: 49.35%
+2025-03-20 01:57:49,375 - INFO - Val Loss: 0.5946 | Acc: 30.56%
+2025-03-20 01:57:49,375 - INFO - --------------------------------------------------
+2025-03-20 01:57:49,375 - INFO - 
+Epoch 5/5
+2025-03-20 02:03:14,022 - INFO - 
+Epoch 5 Summary:
+2025-03-20 02:03:14,022 - INFO - Duration: 324.65s
+2025-03-20 02:03:14,022 - INFO - Train Loss: 0.6272 | Acc: 48.31%
+2025-03-20 02:03:14,022 - INFO - Val Loss: 0.4968 | Acc: 69.44%
+2025-03-20 02:03:14,022 - INFO - --------------------------------------------------
+2025-03-20 02:03:14,037 - INFO - 
+======= Results for RGB_DeepCNN =======
+2025-03-20 02:03:14,037 - INFO - Validation Accuracy: 69.44%
+2025-03-20 02:03:14,037 - INFO - Validation Loss: 0.4968
+2025-03-20 02:03:14,037 - INFO - Training Accuracy: 48.31%
+2025-03-20 02:03:14,037 - INFO - Training Loss: 0.6272
+2025-03-20 02:03:14,037 - INFO - Epoch Duration: 324.65s
+2025-03-20 02:03:14,037 - INFO - ==================================================
+2025-03-20 02:03:14,037 - INFO - Configuration details:
+2025-03-20 02:03:14,037 - INFO -   - Image size: 48px
+2025-03-20 02:03:14,037 - INFO -   - Image format: RGB
+2025-03-20 02:03:14,037 - INFO -   - CNN depth: 2 convolutional blocks
+2025-03-20 02:03:14,037 - INFO -   - Kernels per layer: 32
+2025-03-20 02:03:14,037 - INFO - 
+======= Starting experiment: Grayscale_VeryDeepCNN =======
+2025-03-20 02:04:21,019 - INFO - Original dataset size: 800 training, 340 validation
+2025-03-20 02:04:21,019 - INFO - After balancing: 4000 training samples (equal class distribution)
+2025-03-20 02:04:21,019 - INFO - Final dataset size: 800 training, 340 validation
+2025-03-20 02:04:24,917 - INFO - 
+Model Architectures:
+2025-03-20 02:04:24,918 - INFO - Image CNN Architecture:
+2025-03-20 02:04:24,918 - INFO - [<framework.ConvolutionalLayer.ConvolutionalLayer object at 0x316ee4170>, <framework.ReLULayer.ReLULayer object at 0x316ee4140>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x316ee40e0>, <framework.ConvolutionalLayer.ConvolutionalLayer object at 0x316ee4380>, <framework.ReLULayer.ReLULayer object at 0x316ee4350>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x316ee4320>, <framework.ConvolutionalLayer.ConvolutionalLayer object at 0x316ee42f0>, <framework.ReLULayer.ReLULayer object at 0x316ee4290>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x316ee42c0>, <framework.FlatteningLayer.FlatteningLayer object at 0x316ee4110>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x316ee4260>, <framework.ReLULayer.ReLULayer object at 0x316ee44d0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x316ee44a0>]
+2025-03-20 02:04:24,918 - INFO - 
+Text CNN Architecture:
+2025-03-20 02:04:24,918 - INFO - [<framework.EmbeddingLayer.EmbeddingLayer object at 0x316ee4440>, <framework.TransposeLayer.TransposeLayer object at 0x316ee43e0>, <framework.Conv1DLayer.Conv1DLayer object at 0x316ee4410>, <framework.ReLULayer.ReLULayer object at 0x316ee43b0>, <framework.GlobalMaxPooling1DLayer.GlobalMaxPooling1DLayer object at 0x316ee45f0>, <framework.FlatteningLayer.FlatteningLayer object at 0x316ee45c0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x316ee4590>]
+2025-03-20 02:04:24,918 - INFO - 
+Starting training...
+2025-03-20 02:04:24,918 - INFO - Starting training with:
+2025-03-20 02:04:24,918 - INFO - Epochs: 5
+2025-03-20 02:04:24,918 - INFO - Batch size: 96
+2025-03-20 02:04:24,918 - INFO - Learning rate: 0.01
+2025-03-20 02:04:24,918 - INFO - Image size: 48
+2025-03-20 02:04:24,918 - INFO - Conv blocks: 3
+2025-03-20 02:04:24,918 - INFO - Grayscale: True
+2025-03-20 02:04:24,918 - INFO - Num kernels: 48
+2025-03-20 02:04:24,918 - INFO - Using 20% of dataset: 800 training, 340 validation samples
+2025-03-20 02:04:24,918 - INFO - 
+Epoch 1/5
+2025-03-20 02:12:47,755 - INFO - 
+Epoch 1 Summary:
+2025-03-20 02:12:47,756 - INFO - Duration: 502.84s
+2025-03-20 02:12:47,756 - INFO - Train Loss: 0.7488 | Acc: 50.39%
+2025-03-20 02:12:47,756 - INFO - Val Loss: 0.5267 | Acc: 50.35%
+2025-03-20 02:12:47,756 - INFO - --------------------------------------------------
+2025-03-20 02:12:47,756 - INFO - 
+Epoch 2/5
+2025-03-20 02:21:10,893 - INFO - 
+Epoch 2 Summary:
+2025-03-20 02:21:10,893 - INFO - Duration: 503.14s
+2025-03-20 02:21:10,893 - INFO - Train Loss: 0.7005 | Acc: 47.92%
+2025-03-20 02:21:10,893 - INFO - Val Loss: 0.6466 | Acc: 32.99%
+2025-03-20 02:21:10,893 - INFO - --------------------------------------------------
+2025-03-20 02:21:10,893 - INFO - 
+Epoch 3/5
+2025-03-20 02:29:33,847 - INFO - 
+Epoch 3 Summary:
+2025-03-20 02:29:33,847 - INFO - Duration: 502.95s
+2025-03-20 02:29:33,847 - INFO - Train Loss: 0.6228 | Acc: 51.82%
+2025-03-20 02:29:33,847 - INFO - Val Loss: 0.5130 | Acc: 67.01%
+2025-03-20 02:29:33,847 - INFO - --------------------------------------------------
+2025-03-20 02:29:33,847 - INFO - Reducing learning rate to 0.005
+2025-03-20 02:29:33,847 - INFO - 
+Epoch 4/5
+2025-03-20 02:37:55,897 - INFO - 
+Epoch 4 Summary:
+2025-03-20 02:37:55,898 - INFO - Duration: 502.05s
+2025-03-20 02:37:55,898 - INFO - Train Loss: 0.6189 | Acc: 48.18%
+2025-03-20 02:37:55,898 - INFO - Val Loss: 0.5176 | Acc: 61.81%
+2025-03-20 02:37:55,898 - INFO - --------------------------------------------------
+2025-03-20 02:37:55,898 - INFO - 
+Epoch 5/5
+2025-03-20 02:46:15,591 - INFO - 
+Epoch 5 Summary:
+2025-03-20 02:46:15,592 - INFO - Duration: 499.69s
+2025-03-20 02:46:15,592 - INFO - Train Loss: 0.6176 | Acc: 46.22%
+2025-03-20 02:46:15,592 - INFO - Val Loss: 0.5080 | Acc: 67.01%
+2025-03-20 02:46:15,592 - INFO - --------------------------------------------------
+2025-03-20 02:46:15,603 - INFO - 
+======= Results for Grayscale_VeryDeepCNN =======
+2025-03-20 02:46:15,603 - INFO - Validation Accuracy: 67.01%
+2025-03-20 02:46:15,603 - INFO - Validation Loss: 0.5080
+2025-03-20 02:46:15,603 - INFO - Training Accuracy: 46.22%
+2025-03-20 02:46:15,603 - INFO - Training Loss: 0.6176
+2025-03-20 02:46:15,603 - INFO - Epoch Duration: 499.69s
+2025-03-20 02:46:15,603 - INFO - ==================================================
+2025-03-20 02:46:15,603 - INFO - Configuration details:
+2025-03-20 02:46:15,603 - INFO -   - Image size: 48px
+2025-03-20 02:46:15,603 - INFO -   - Image format: Grayscale
+2025-03-20 02:46:15,603 - INFO -   - CNN depth: 3 convolutional blocks
+2025-03-20 02:46:15,603 - INFO -   - Kernels per layer: 48
+2025-03-20 02:46:15,603 - INFO - 
+======= Starting experiment: RGB_VeryDeepCNN =======
+2025-03-20 02:47:26,667 - INFO - Original dataset size: 800 training, 340 validation
+2025-03-20 02:47:26,667 - INFO - After balancing: 4000 training samples (equal class distribution)
+2025-03-20 02:47:26,667 - INFO - Final dataset size: 800 training, 340 validation
+2025-03-20 02:47:30,453 - INFO - 
+Model Architectures:
+2025-03-20 02:47:30,453 - INFO - Image CNN Architecture:
+2025-03-20 02:47:30,453 - INFO - [<framework.ConvolutionalLayer.ConvolutionalLayer object at 0x12d55b950>, <framework.ReLULayer.ReLULayer object at 0x12d558aa0>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x12d55b890>, <framework.ConvolutionalLayer.ConvolutionalLayer object at 0x12d558cb0>, <framework.ReLULayer.ReLULayer object at 0x12d55b470>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x12d55bfe0>, <framework.ConvolutionalLayer.ConvolutionalLayer object at 0x12d55bef0>, <framework.ReLULayer.ReLULayer object at 0x12d55be60>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x17e6bb290>, <framework.FlatteningLayer.FlatteningLayer object at 0x12d55b800>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x16d70d040>, <framework.ReLULayer.ReLULayer object at 0x16db0acc0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x16db0b1d0>]
+2025-03-20 02:47:30,453 - INFO - 
+Text CNN Architecture:
+2025-03-20 02:47:30,453 - INFO - [<framework.EmbeddingLayer.EmbeddingLayer object at 0x16db0b980>, <framework.TransposeLayer.TransposeLayer object at 0x16db0b170>, <framework.Conv1DLayer.Conv1DLayer object at 0x17ffbce90>, <framework.ReLULayer.ReLULayer object at 0x17ffbdeb0>, <framework.GlobalMaxPooling1DLayer.GlobalMaxPooling1DLayer object at 0x17ffbe7b0>, <framework.FlatteningLayer.FlatteningLayer object at 0x17ffbc920>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17ffbde50>]
+2025-03-20 02:47:30,453 - INFO - 
+Starting training...
+2025-03-20 02:47:30,453 - INFO - Starting training with:
+2025-03-20 02:47:30,453 - INFO - Epochs: 5
+2025-03-20 02:47:30,453 - INFO - Batch size: 96
+2025-03-20 02:47:30,453 - INFO - Learning rate: 0.01
+2025-03-20 02:47:30,453 - INFO - Image size: 48
+2025-03-20 02:47:30,453 - INFO - Conv blocks: 3
+2025-03-20 02:47:30,453 - INFO - Grayscale: False
+2025-03-20 02:47:30,453 - INFO - Num kernels: 48
+2025-03-20 02:47:30,453 - INFO - Using 20% of dataset: 800 training, 340 validation samples
+2025-03-20 02:47:30,453 - INFO - 
+Epoch 1/5
+2025-03-20 02:55:57,334 - INFO - 
+Epoch 1 Summary:
+2025-03-20 02:55:57,335 - INFO - Duration: 506.88s
+2025-03-20 02:55:57,335 - INFO - Train Loss: 0.7360 | Acc: 51.95%
+2025-03-20 02:55:57,335 - INFO - Val Loss: 0.7001 | Acc: 28.47%
+2025-03-20 02:55:57,335 - INFO - --------------------------------------------------
+2025-03-20 02:55:57,335 - INFO - 
+Epoch 2/5
+2025-03-20 03:04:24,940 - INFO - 
+Epoch 2 Summary:
+2025-03-20 03:04:24,941 - INFO - Duration: 507.60s
+2025-03-20 03:04:24,941 - INFO - Train Loss: 0.9411 | Acc: 51.43%
+2025-03-20 03:04:24,941 - INFO - Val Loss: 1.2132 | Acc: 28.47%
+2025-03-20 03:04:24,941 - INFO - --------------------------------------------------
+2025-03-20 03:04:24,941 - INFO - 
+Epoch 3/5
+2025-03-20 03:12:50,865 - INFO - 
+Epoch 3 Summary:
+2025-03-20 03:12:50,866 - INFO - Duration: 505.92s
+2025-03-20 03:12:50,866 - INFO - Train Loss: 0.8010 | Acc: 53.12%
+2025-03-20 03:12:50,866 - INFO - Val Loss: 0.4567 | Acc: 71.53%
+2025-03-20 03:12:50,866 - INFO - --------------------------------------------------
+2025-03-20 03:12:50,866 - INFO - Reducing learning rate to 0.005
+2025-03-20 03:12:50,866 - INFO - 
+Epoch 4/5
+2025-03-20 03:21:28,005 - INFO - 
+Epoch 4 Summary:
+2025-03-20 03:21:28,006 - INFO - Duration: 517.14s
+2025-03-20 03:21:28,006 - INFO - Train Loss: 0.6759 | Acc: 49.74%
+2025-03-20 03:21:28,006 - INFO - Val Loss: 0.5848 | Acc: 29.51%
+2025-03-20 03:21:28,006 - INFO - --------------------------------------------------
+2025-03-20 03:21:28,006 - INFO - 
+Epoch 5/5
+2025-03-20 03:29:57,397 - INFO - 
+Epoch 5 Summary:
+2025-03-20 03:29:57,398 - INFO - Duration: 509.39s
+2025-03-20 03:29:57,398 - INFO - Train Loss: 0.6221 | Acc: 54.17%
+2025-03-20 03:29:57,398 - INFO - Val Loss: 0.6140 | Acc: 29.86%
+2025-03-20 03:29:57,398 - INFO - --------------------------------------------------
+2025-03-20 03:29:57,410 - INFO - 
+======= Results for RGB_VeryDeepCNN =======
+2025-03-20 03:29:57,410 - INFO - Validation Accuracy: 29.86%
+2025-03-20 03:29:57,410 - INFO - Validation Loss: 0.6140
+2025-03-20 03:29:57,410 - INFO - Training Accuracy: 54.17%
+2025-03-20 03:29:57,410 - INFO - Training Loss: 0.6221
+2025-03-20 03:29:57,410 - INFO - Epoch Duration: 509.39s
+2025-03-20 03:29:57,411 - INFO - ==================================================
+2025-03-20 03:29:57,411 - INFO - Configuration details:
+2025-03-20 03:29:57,411 - INFO -   - Image size: 48px
+2025-03-20 03:29:57,411 - INFO -   - Image format: RGB
+2025-03-20 03:29:57,411 - INFO -   - CNN depth: 3 convolutional blocks
+2025-03-20 03:29:57,411 - INFO -   - Kernels per layer: 48
+2025-03-20 03:29:57,411 - INFO - 
+======= EXPERIMENT SUMMARY =======
+2025-03-20 03:29:57,411 - INFO - Grayscale_DeepCNN: Val Acc=48.96%, Train Acc=54.95%, Time/epoch=322.34s
+2025-03-20 03:29:57,411 - INFO - RGB_DeepCNN: Val Acc=69.44%, Train Acc=48.31%, Time/epoch=324.27s
+2025-03-20 03:29:57,411 - INFO - Grayscale_VeryDeepCNN: Val Acc=67.01%, Train Acc=46.22%, Time/epoch=502.13s
+2025-03-20 03:29:57,411 - INFO - RGB_VeryDeepCNN: Val Acc=29.86%, Train Acc=54.17%, Time/epoch=509.39s
+2025-03-20 03:29:57,411 - INFO - 
+======= Generating visualization plots =======
+2025-03-20 03:29:57,786 - INFO - Saved accuracy plot to experiment_plots_2/accuracy_comparison_20250320_032957.png
+2025-03-20 03:29:57,984 - INFO - Saved loss plot to experiment_plots_2/loss_comparison_20250320_032957.png
+2025-03-20 03:29:58,073 - INFO - Saved Grayscale_DeepCNN accuracy plot to experiment_plots_2/Grayscale_DeepCNN_accuracy_20250320_032957.png
+2025-03-20 03:29:58,162 - INFO - Saved RGB_DeepCNN accuracy plot to experiment_plots_2/RGB_DeepCNN_accuracy_20250320_032957.png
+2025-03-20 03:29:58,251 - INFO - Saved Grayscale_VeryDeepCNN accuracy plot to experiment_plots_2/Grayscale_VeryDeepCNN_accuracy_20250320_032957.png
+2025-03-20 03:29:58,345 - INFO - Saved RGB_VeryDeepCNN accuracy plot to experiment_plots_2/RGB_VeryDeepCNN_accuracy_20250320_032957.png
+2025-03-20 03:29:58,345 - INFO - Visualization complete. Plots saved to 'experiment_plots' directory.
+2025-03-20 06:39:28,684 - INFO - Using Apple Silicon optimized Metal Performance Shaders (MPS) backend.
+2025-03-20 06:39:28,684 - INFO - 
+======= Starting experiment: Grayscale_DeepCNN =======
+2025-03-20 06:40:39,395 - INFO - Original dataset size: 974 training, 340 validation
+2025-03-20 06:40:39,396 - INFO - After balancing: 4870 training samples (equal class distribution)
+2025-03-20 06:40:39,396 - INFO - Final dataset size: 974 training, 340 validation
+2025-03-20 06:40:44,043 - INFO - 
+Model Architectures:
+2025-03-20 06:40:44,043 - INFO - Image CNN Architecture:
+2025-03-20 06:40:44,043 - INFO - [<framework.ConvolutionalLayer.ConvolutionalLayer object at 0x1570846b0>, <framework.ReLULayer.ReLULayer object at 0x1546759d0>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x15627f830>, <framework.ConvolutionalLayer.ConvolutionalLayer object at 0x15627d130>, <framework.ReLULayer.ReLULayer object at 0x153f46fc0>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x1570bd730>, <framework.FlatteningLayer.FlatteningLayer object at 0x15627e8a0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x151a09070>, <framework.ReLULayer.ReLULayer object at 0x156235970>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x1562362d0>]
+2025-03-20 06:40:44,043 - INFO - 
+Text CNN Architecture:
+2025-03-20 06:40:44,044 - INFO - [<framework.EmbeddingLayer.EmbeddingLayer object at 0x15711be00>, <framework.TransposeLayer.TransposeLayer object at 0x1571182f0>, <framework.Conv1DLayer.Conv1DLayer object at 0x1544d7020>, <framework.ReLULayer.ReLULayer object at 0x157035fd0>, <framework.GlobalMaxPooling1DLayer.GlobalMaxPooling1DLayer object at 0x157037980>, <framework.FlatteningLayer.FlatteningLayer object at 0x157035070>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x157034b30>]
+2025-03-20 06:40:44,044 - INFO - 
+Starting training...
+2025-03-20 06:40:44,044 - INFO - Starting training with:
+2025-03-20 06:40:44,044 - INFO - Epochs: 15
+2025-03-20 06:40:44,044 - INFO - Batch size: 64
+2025-03-20 06:40:44,044 - INFO - Learning rate: 0.005
+2025-03-20 06:40:44,044 - INFO - Image size: 56
+2025-03-20 06:40:44,044 - INFO - Conv blocks: 2
+2025-03-20 06:40:44,044 - INFO - Grayscale: True
+2025-03-20 06:40:44,044 - INFO - Num kernels: 64
+2025-03-20 06:40:44,044 - INFO - Using 20% of dataset: 974 training, 340 validation samples
+2025-03-20 06:40:44,044 - INFO - 
+Epoch 1/15
+2025-03-20 06:45:41,809 - INFO - Using Apple Silicon optimized Metal Performance Shaders (MPS) backend.
+2025-03-20 06:45:41,809 - INFO - 
+======= Starting experiment: Grayscale_DeepCNN =======
+2025-03-20 06:46:50,848 - INFO - Original dataset size: 958 training, 340 validation
+2025-03-20 06:46:50,849 - INFO - After balancing: 4794 training samples (equal class distribution)
+2025-03-20 06:46:50,849 - INFO - Final dataset size: 958 training, 340 validation
+2025-03-20 06:46:55,408 - INFO - 
+Model Architectures:
+2025-03-20 06:46:55,408 - INFO - Image CNN Architecture:
+2025-03-20 06:46:55,408 - INFO - [<framework.ConvolutionalLayer.ConvolutionalLayer object at 0x313461a30>, <framework.ReLULayer.ReLULayer object at 0x3106d6810>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x3106d67b0>, <framework.ConvolutionalLayer.ConvolutionalLayer object at 0x3107583b0>, <framework.ReLULayer.ReLULayer object at 0x309715bb0>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x310731b20>, <framework.FlatteningLayer.FlatteningLayer object at 0x3106e94f0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x3106bd190>, <framework.ReLULayer.ReLULayer object at 0x313462480>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x3106bcfb0>]
+2025-03-20 06:46:55,408 - INFO - 
+Text CNN Architecture:
+2025-03-20 06:46:55,408 - INFO - [<framework.EmbeddingLayer.EmbeddingLayer object at 0x3137e0140>, <framework.TransposeLayer.TransposeLayer object at 0x3137e0a10>, <framework.Conv1DLayer.Conv1DLayer object at 0x3137e16a0>, <framework.ReLULayer.ReLULayer object at 0x310713650>, <framework.GlobalMaxPooling1DLayer.GlobalMaxPooling1DLayer object at 0x3137e0170>, <framework.FlatteningLayer.FlatteningLayer object at 0x3137e0f20>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x3137e0f80>]
+2025-03-20 06:46:55,408 - INFO - 
+Starting training...
+2025-03-20 06:46:55,408 - INFO - Starting training with:
+2025-03-20 06:46:55,408 - INFO - Epochs: 15
+2025-03-20 06:46:55,408 - INFO - Batch size: 64
+2025-03-20 06:46:55,408 - INFO - Learning rate: 0.005
+2025-03-20 06:46:55,408 - INFO - Image size: 56
+2025-03-20 06:46:55,408 - INFO - Conv blocks: 2
+2025-03-20 06:46:55,408 - INFO - Grayscale: True
+2025-03-20 06:46:55,408 - INFO - Num kernels: 64
+2025-03-20 06:46:55,408 - INFO - Using 20% of dataset: 958 training, 340 validation samples
+2025-03-20 06:46:55,408 - INFO - 
+Epoch 1/15
+2025-03-20 06:48:35,521 - INFO - Using Apple Silicon optimized Metal Performance Shaders (MPS) backend.
+2025-03-20 06:48:35,522 - INFO - 
+======= Starting experiment: Grayscale_DeepCNN =======
+2025-03-20 06:49:44,862 - INFO - Original dataset size: 969 training, 340 validation
+2025-03-20 06:49:44,863 - INFO - After balancing: 4848 training samples (equal class distribution)
+2025-03-20 06:49:44,863 - INFO - Final dataset size: 969 training, 340 validation
+2025-03-20 06:49:49,569 - INFO - 
+Model Architectures:
+2025-03-20 06:49:49,569 - INFO - Image CNN Architecture:
+2025-03-20 06:49:49,569 - INFO - [<framework.ConvolutionalLayer.ConvolutionalLayer object at 0x17d8fbda0>, <framework.ReLULayer.ReLULayer object at 0x17d918290>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x17d8d2180>, <framework.ConvolutionalLayer.ConvolutionalLayer object at 0x17d943620>, <framework.ReLULayer.ReLULayer object at 0x17d41cf20>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x17d41c680>, <framework.FlatteningLayer.FlatteningLayer object at 0x17d41c620>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17d41d280>, <framework.ReLULayer.ReLULayer object at 0x17e86ff80>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17e86fb90>]
+2025-03-20 06:49:49,570 - INFO - 
+Text CNN Architecture:
+2025-03-20 06:49:49,570 - INFO - [<framework.EmbeddingLayer.EmbeddingLayer object at 0x17e86f290>, <framework.TransposeLayer.TransposeLayer object at 0x17e86fbf0>, <framework.Conv1DLayer.Conv1DLayer object at 0x17e86fc20>, <framework.ReLULayer.ReLULayer object at 0x16f7c26c0>, <framework.GlobalMaxPooling1DLayer.GlobalMaxPooling1DLayer object at 0x17e957bc0>, <framework.FlatteningLayer.FlatteningLayer object at 0x17e957b60>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17e957ad0>]
+2025-03-20 06:49:49,570 - INFO - 
+Starting training...
+2025-03-20 06:49:49,570 - INFO - Starting training with:
+2025-03-20 06:49:49,570 - INFO - Epochs: 10
+2025-03-20 06:49:49,570 - INFO - Batch size: 64
+2025-03-20 06:49:49,570 - INFO - Learning rate: 0.005
+2025-03-20 06:49:49,570 - INFO - Image size: 56
+2025-03-20 06:49:49,570 - INFO - Conv blocks: 2
+2025-03-20 06:49:49,570 - INFO - Grayscale: True
+2025-03-20 06:49:49,570 - INFO - Num kernels: 64
+2025-03-20 06:49:49,570 - INFO - Using 20% of dataset: 969 training, 340 validation samples
+2025-03-20 06:49:49,570 - INFO - 
+Epoch 1/10
+2025-03-20 07:07:41,059 - INFO - 
+Epoch 1 Summary:
+2025-03-20 07:07:41,060 - INFO - Duration: 1071.49s
+2025-03-20 07:07:41,060 - INFO - Train Loss: 0.7267 | Acc: 48.19%
+2025-03-20 07:07:41,060 - INFO - Val Loss: 0.8415 | Acc: 32.94%
+2025-03-20 07:07:41,060 - INFO - --------------------------------------------------
+2025-03-20 07:07:41,060 - INFO - 
+Epoch 2/10
+2025-03-20 07:25:29,908 - INFO - 
+Epoch 2 Summary:
+2025-03-20 07:25:29,908 - INFO - Duration: 1068.85s
+2025-03-20 07:25:29,908 - INFO - Train Loss: 0.7055 | Acc: 50.46%
+2025-03-20 07:25:29,908 - INFO - Val Loss: 0.6419 | Acc: 67.06%
+2025-03-20 07:25:29,908 - INFO - --------------------------------------------------
+2025-03-20 07:25:29,908 - INFO - 
+Epoch 3/10
+2025-03-20 07:43:20,282 - INFO - 
+Epoch 3 Summary:
+2025-03-20 07:43:20,283 - INFO - Duration: 1070.37s
+2025-03-20 07:43:20,284 - INFO - Train Loss: 0.7065 | Acc: 51.19%
+2025-03-20 07:43:20,284 - INFO - Val Loss: 0.7669 | Acc: 32.94%
+2025-03-20 07:43:20,284 - INFO - --------------------------------------------------
+2025-03-20 07:43:20,284 - INFO - Reducing learning rate to 0.0034999999999999996
+2025-03-20 07:43:20,284 - INFO - 
+Epoch 4/10
+2025-03-20 08:01:08,981 - INFO - 
+Epoch 4 Summary:
+2025-03-20 08:01:08,982 - INFO - Duration: 1068.70s
+2025-03-20 08:01:08,982 - INFO - Train Loss: 0.6988 | Acc: 49.95%
+2025-03-20 08:01:08,982 - INFO - Val Loss: 0.6917 | Acc: 55.88%
+2025-03-20 08:01:08,982 - INFO - --------------------------------------------------
+2025-03-20 08:01:08,982 - INFO - 
+Epoch 5/10
+2025-03-20 08:18:58,656 - INFO - 
+Epoch 5 Summary:
+2025-03-20 08:18:58,657 - INFO - Duration: 1069.67s
+2025-03-20 08:18:58,657 - INFO - Train Loss: 0.6935 | Acc: 51.50%
+2025-03-20 08:18:58,657 - INFO - Val Loss: 0.6870 | Acc: 63.24%
+2025-03-20 08:18:58,657 - INFO - --------------------------------------------------
+2025-03-20 08:18:58,657 - INFO - 
+Epoch 6/10
+2025-03-20 08:36:47,342 - INFO - 
+Epoch 6 Summary:
+2025-03-20 08:36:47,343 - INFO - Duration: 1068.69s
+2025-03-20 08:36:47,344 - INFO - Train Loss: 0.6860 | Acc: 57.17%
+2025-03-20 08:36:47,344 - INFO - Val Loss: 0.7235 | Acc: 40.88%
+2025-03-20 08:36:47,344 - INFO - --------------------------------------------------
+2025-03-20 08:36:47,344 - INFO - Reducing learning rate to 0.0017499999999999998
+2025-03-20 08:36:47,344 - INFO - 
+Epoch 7/10
+2025-03-20 08:54:35,935 - INFO - 
+Epoch 7 Summary:
+2025-03-20 08:54:35,936 - INFO - Duration: 1068.59s
+2025-03-20 08:54:35,936 - INFO - Train Loss: 0.6829 | Acc: 55.73%
+2025-03-20 08:54:35,936 - INFO - Val Loss: 0.6473 | Acc: 67.06%
+2025-03-20 08:54:35,936 - INFO - --------------------------------------------------
+2025-03-20 08:54:35,936 - INFO - 
+Epoch 8/10
+2025-03-20 09:12:25,959 - INFO - 
+Epoch 8 Summary:
+2025-03-20 09:12:25,959 - INFO - Duration: 1070.02s
+2025-03-20 09:12:25,959 - INFO - Train Loss: 0.6884 | Acc: 52.94%
+2025-03-20 09:12:25,959 - INFO - Val Loss: 0.6664 | Acc: 63.53%
+2025-03-20 09:12:25,959 - INFO - --------------------------------------------------
+2025-03-20 09:12:25,959 - INFO - 
+Epoch 9/10
+2025-03-20 09:30:17,359 - INFO - 
+Epoch 9 Summary:
+2025-03-20 09:30:17,360 - INFO - Duration: 1071.40s
+2025-03-20 09:30:17,360 - INFO - Train Loss: 0.6867 | Acc: 56.66%
+2025-03-20 09:30:17,360 - INFO - Val Loss: 0.7020 | Acc: 47.65%
+2025-03-20 09:30:17,360 - INFO - --------------------------------------------------
+2025-03-20 09:30:17,360 - INFO - Reducing learning rate to 0.000525
+2025-03-20 09:30:17,360 - INFO - 
+Epoch 10/10
+2025-03-20 09:48:12,228 - INFO - 
+Epoch 10 Summary:
+2025-03-20 09:48:12,230 - INFO - Duration: 1074.87s
+2025-03-20 09:48:12,231 - INFO - Train Loss: 0.6768 | Acc: 58.41%
+2025-03-20 09:48:12,231 - INFO - Val Loss: 0.6614 | Acc: 65.00%
+2025-03-20 09:48:12,231 - INFO - --------------------------------------------------
+2025-03-20 09:48:12,231 - INFO - Early stopping triggered after 10 epochs
+2025-03-20 09:48:12,241 - INFO - 
+======= Results for Grayscale_DeepCNN =======
+2025-03-20 09:48:12,241 - INFO - Validation Accuracy: 65.00%
+2025-03-20 09:48:12,241 - INFO - Validation Loss: 0.6614
+2025-03-20 09:48:12,241 - INFO - Training Accuracy: 58.41%
+2025-03-20 09:48:12,241 - INFO - Training Loss: 0.6768
+2025-03-20 09:48:12,241 - INFO - Epoch Duration: 1074.87s
+2025-03-20 09:48:12,241 - INFO - ==================================================
+2025-03-20 09:48:12,241 - INFO - Configuration details:
+2025-03-20 09:48:12,241 - INFO -   - Image size: 56px
+2025-03-20 09:48:12,241 - INFO -   - Image format: Grayscale
+2025-03-20 09:48:12,241 - INFO -   - CNN depth: 2 convolutional blocks
+2025-03-20 09:48:12,241 - INFO -   - Kernels per layer: 64
+2025-03-20 09:48:12,241 - INFO - 
+======= Starting experiment: RGB_DeepCNN =======
+2025-03-20 09:49:23,216 - INFO - Original dataset size: 968 training, 340 validation
+2025-03-20 09:49:23,217 - INFO - After balancing: 4840 training samples (equal class distribution)
+2025-03-20 09:49:23,217 - INFO - Final dataset size: 968 training, 340 validation
+2025-03-20 09:49:28,084 - INFO - 
+Model Architectures:
+2025-03-20 09:49:28,084 - INFO - Image CNN Architecture:
+2025-03-20 09:49:28,084 - INFO - [<framework.ConvolutionalLayer.ConvolutionalLayer object at 0x17f20c110>, <framework.ReLULayer.ReLULayer object at 0x17f20c320>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x17f20c2f0>, <framework.ConvolutionalLayer.ConvolutionalLayer object at 0x17f20c2c0>, <framework.ReLULayer.ReLULayer object at 0x17f20c290>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x17f20c230>, <framework.FlatteningLayer.FlatteningLayer object at 0x17f20c0b0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17f20c260>, <framework.ReLULayer.ReLULayer object at 0x16b53fbf0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17f20c200>]
+2025-03-20 09:49:28,084 - INFO - 
+Text CNN Architecture:
+2025-03-20 09:49:28,084 - INFO - [<framework.EmbeddingLayer.EmbeddingLayer object at 0x17f20c410>, <framework.TransposeLayer.TransposeLayer object at 0x17f20c3e0>, <framework.Conv1DLayer.Conv1DLayer object at 0x17f20c380>, <framework.ReLULayer.ReLULayer object at 0x17f20c3b0>, <framework.GlobalMaxPooling1DLayer.GlobalMaxPooling1DLayer object at 0x17f20c350>, <framework.FlatteningLayer.FlatteningLayer object at 0x17f20c5c0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17f20c590>]
+2025-03-20 09:49:28,084 - INFO - 
+Starting training...
+2025-03-20 09:49:28,084 - INFO - Starting training with:
+2025-03-20 09:49:28,084 - INFO - Epochs: 10
+2025-03-20 09:49:28,084 - INFO - Batch size: 64
+2025-03-20 09:49:28,084 - INFO - Learning rate: 0.005
+2025-03-20 09:49:28,084 - INFO - Image size: 56
+2025-03-20 09:49:28,084 - INFO - Conv blocks: 2
+2025-03-20 09:49:28,084 - INFO - Grayscale: False
+2025-03-20 09:49:28,084 - INFO - Num kernels: 64
+2025-03-20 09:49:28,084 - INFO - Using 20% of dataset: 968 training, 340 validation samples
+2025-03-20 09:49:28,084 - INFO - 
+Epoch 1/10
+2025-03-20 10:07:21,384 - INFO - 
+Epoch 1 Summary:
+2025-03-20 10:07:21,385 - INFO - Duration: 1073.30s
+2025-03-20 10:07:21,385 - INFO - Train Loss: 0.7381 | Acc: 49.07%
+2025-03-20 10:07:21,385 - INFO - Val Loss: 0.7016 | Acc: 38.24%
+2025-03-20 10:07:21,385 - INFO - --------------------------------------------------
+2025-03-20 10:07:21,385 - INFO - 
+Epoch 2/10
+2025-03-20 10:25:15,386 - INFO - 
+Epoch 2 Summary:
+2025-03-20 10:25:15,387 - INFO - Duration: 1074.00s
+2025-03-20 10:25:15,387 - INFO - Train Loss: 0.7149 | Acc: 49.17%
+2025-03-20 10:25:15,387 - INFO - Val Loss: 0.6810 | Acc: 66.18%
+2025-03-20 10:25:15,387 - INFO - --------------------------------------------------
+2025-03-20 10:25:15,387 - INFO - 
+Epoch 3/10
+2025-03-20 10:43:12,500 - INFO - 
+Epoch 3 Summary:
+2025-03-20 10:43:12,501 - INFO - Duration: 1077.11s
+2025-03-20 10:43:12,501 - INFO - Train Loss: 0.7123 | Acc: 47.62%
+2025-03-20 10:43:12,501 - INFO - Val Loss: 0.6981 | Acc: 37.35%
+2025-03-20 10:43:12,501 - INFO - --------------------------------------------------
+2025-03-20 10:43:12,501 - INFO - Reducing learning rate to 0.0034999999999999996
+2025-03-20 10:43:12,501 - INFO - 
+Epoch 4/10
+2025-03-20 11:01:07,292 - INFO - 
+Epoch 4 Summary:
+2025-03-20 11:01:07,293 - INFO - Duration: 1074.79s
+2025-03-20 11:01:07,293 - INFO - Train Loss: 0.6954 | Acc: 49.59%
+2025-03-20 11:01:07,293 - INFO - Val Loss: 0.6798 | Acc: 63.53%
+2025-03-20 11:01:07,293 - INFO - --------------------------------------------------
+2025-03-20 11:01:07,293 - INFO - 
+Epoch 5/10
+2025-03-20 11:19:04,578 - INFO - 
+Epoch 5 Summary:
+2025-03-20 11:19:04,579 - INFO - Duration: 1077.28s
+2025-03-20 11:19:04,579 - INFO - Train Loss: 0.6916 | Acc: 50.93%
+2025-03-20 11:19:04,579 - INFO - Val Loss: 0.6770 | Acc: 66.18%
+2025-03-20 11:19:04,579 - INFO - --------------------------------------------------
+2025-03-20 11:19:04,579 - INFO - 
+Epoch 6/10
+2025-03-20 11:37:00,534 - INFO - 
+Epoch 6 Summary:
+2025-03-20 11:37:00,536 - INFO - Duration: 1075.96s
+2025-03-20 11:37:00,536 - INFO - Train Loss: 0.6869 | Acc: 54.65%
+2025-03-20 11:37:00,536 - INFO - Val Loss: 0.6920 | Acc: 47.94%
+2025-03-20 11:37:00,536 - INFO - --------------------------------------------------
+2025-03-20 11:37:00,536 - INFO - Reducing learning rate to 0.0017499999999999998
+2025-03-20 11:37:00,536 - INFO - 
+Epoch 7/10
+2025-03-20 11:54:54,338 - INFO - 
+Epoch 7 Summary:
+2025-03-20 11:54:54,339 - INFO - Duration: 1073.80s
+2025-03-20 11:54:54,339 - INFO - Train Loss: 0.6833 | Acc: 55.99%
+2025-03-20 11:54:54,339 - INFO - Val Loss: 0.6704 | Acc: 61.76%
+2025-03-20 11:54:54,339 - INFO - --------------------------------------------------
+2025-03-20 11:54:54,339 - INFO - 
+Epoch 8/10
+2025-03-20 12:12:48,438 - INFO - 
+Epoch 8 Summary:
+2025-03-20 12:12:48,438 - INFO - Duration: 1074.10s
+2025-03-20 12:12:48,438 - INFO - Train Loss: 0.6802 | Acc: 58.26%
+2025-03-20 12:12:48,438 - INFO - Val Loss: 0.6561 | Acc: 62.35%
+2025-03-20 12:12:48,438 - INFO - --------------------------------------------------
+2025-03-20 12:12:48,438 - INFO - 
+Epoch 9/10
+2025-03-20 12:30:40,522 - INFO - 
+Epoch 9 Summary:
+2025-03-20 12:30:40,523 - INFO - Duration: 1072.08s
+2025-03-20 12:30:40,523 - INFO - Train Loss: 0.6833 | Acc: 59.81%
+2025-03-20 12:30:40,523 - INFO - Val Loss: 0.7065 | Acc: 47.35%
+2025-03-20 12:30:40,523 - INFO - --------------------------------------------------
+2025-03-20 12:30:40,523 - INFO - Reducing learning rate to 0.000525
+2025-03-20 12:30:40,523 - INFO - 
+Epoch 10/10
+2025-03-20 12:48:31,941 - INFO - 
+Epoch 10 Summary:
+2025-03-20 12:48:31,941 - INFO - Duration: 1071.42s
+2025-03-20 12:48:31,941 - INFO - Train Loss: 0.6752 | Acc: 58.99%
+2025-03-20 12:48:31,941 - INFO - Val Loss: 0.6500 | Acc: 62.94%
+2025-03-20 12:48:31,941 - INFO - --------------------------------------------------
+2025-03-20 12:48:31,953 - INFO - 
+======= Results for RGB_DeepCNN =======
+2025-03-20 12:48:31,954 - INFO - Validation Accuracy: 62.94%
+2025-03-20 12:48:31,954 - INFO - Validation Loss: 0.6500
+2025-03-20 12:48:31,954 - INFO - Training Accuracy: 58.99%
+2025-03-20 12:48:31,954 - INFO - Training Loss: 0.6752
+2025-03-20 12:48:31,954 - INFO - Epoch Duration: 1071.42s
+2025-03-20 12:48:31,954 - INFO - ==================================================
+2025-03-20 12:48:31,954 - INFO - Configuration details:
+2025-03-20 12:48:31,954 - INFO -   - Image size: 56px
+2025-03-20 12:48:31,954 - INFO -   - Image format: RGB
+2025-03-20 12:48:31,954 - INFO -   - CNN depth: 2 convolutional blocks
+2025-03-20 12:48:31,954 - INFO -   - Kernels per layer: 64
+2025-03-20 12:48:31,954 - INFO - 
+======= Starting experiment: Grayscale_VeryDeepCNN =======
+2025-03-20 12:49:41,810 - INFO - Original dataset size: 950 training, 340 validation
+2025-03-20 12:49:41,811 - INFO - After balancing: 4750 training samples (equal class distribution)
+2025-03-20 12:49:41,811 - INFO - Final dataset size: 950 training, 340 validation
+2025-03-20 12:49:46,235 - INFO - 
+Model Architectures:
+2025-03-20 12:49:46,235 - INFO - Image CNN Architecture:
+2025-03-20 12:49:46,235 - INFO - [<framework.ConvolutionalLayer.ConvolutionalLayer object at 0x17c9df170>, <framework.ReLULayer.ReLULayer object at 0x17d8a52e0>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x17d8a4770>, <framework.ConvolutionalLayer.ConvolutionalLayer object at 0x17e7bbad0>, <framework.ReLULayer.ReLULayer object at 0x17e7b9700>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x17e7ba9f0>, <framework.ConvolutionalLayer.ConvolutionalLayer object at 0x17d41dcd0>, <framework.ReLULayer.ReLULayer object at 0x17d41c5f0>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x17d41c380>, <framework.FlatteningLayer.FlatteningLayer object at 0x17d8a47a0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17d41c2f0>, <framework.ReLULayer.ReLULayer object at 0x16b53fbf0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17d41d760>]
+2025-03-20 12:49:46,235 - INFO - 
+Text CNN Architecture:
+2025-03-20 12:49:46,235 - INFO - [<framework.EmbeddingLayer.EmbeddingLayer object at 0x17d41d7f0>, <framework.TransposeLayer.TransposeLayer object at 0x17d41d0d0>, <framework.Conv1DLayer.Conv1DLayer object at 0x17d41f7d0>, <framework.ReLULayer.ReLULayer object at 0x17d41d940>, <framework.GlobalMaxPooling1DLayer.GlobalMaxPooling1DLayer object at 0x17d41e930>, <framework.FlatteningLayer.FlatteningLayer object at 0x17d41d010>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17d41c890>]
+2025-03-20 12:49:46,235 - INFO - 
+Starting training...
+2025-03-20 12:49:46,235 - INFO - Starting training with:
+2025-03-20 12:49:46,235 - INFO - Epochs: 10
+2025-03-20 12:49:46,235 - INFO - Batch size: 64
+2025-03-20 12:49:46,235 - INFO - Learning rate: 0.005
+2025-03-20 12:49:46,235 - INFO - Image size: 56
+2025-03-20 12:49:46,235 - INFO - Conv blocks: 3
+2025-03-20 12:49:46,235 - INFO - Grayscale: True
+2025-03-20 12:49:46,235 - INFO - Num kernels: 64
+2025-03-20 12:49:46,235 - INFO - Using 20% of dataset: 950 training, 340 validation samples
+2025-03-20 12:49:46,235 - INFO - 
+Epoch 1/10
+2025-03-20 13:08:21,503 - INFO - 
+Epoch 1 Summary:
+2025-03-20 13:08:21,505 - INFO - Duration: 1115.27s
+2025-03-20 13:08:21,505 - INFO - Train Loss: 0.7115 | Acc: 52.53%
+2025-03-20 13:08:21,505 - INFO - Val Loss: 0.6784 | Acc: 65.59%
+2025-03-20 13:08:21,505 - INFO - --------------------------------------------------
+2025-03-20 13:08:21,505 - INFO - 
+Epoch 2/10
+2025-03-20 13:26:57,527 - INFO - 
+Epoch 2 Summary:
+2025-03-20 13:26:57,529 - INFO - Duration: 1116.02s
+2025-03-20 13:26:57,529 - INFO - Train Loss: 0.7064 | Acc: 49.89%
+2025-03-20 13:26:57,529 - INFO - Val Loss: 0.6586 | Acc: 65.29%
+2025-03-20 13:26:57,529 - INFO - --------------------------------------------------
+2025-03-20 13:26:57,529 - INFO - 
+Epoch 3/10
+2025-03-20 13:45:28,945 - INFO - 
+Epoch 3 Summary:
+2025-03-20 13:45:28,947 - INFO - Duration: 1111.42s
+2025-03-20 13:45:28,947 - INFO - Train Loss: 0.6942 | Acc: 54.00%
+2025-03-20 13:45:28,947 - INFO - Val Loss: 0.6550 | Acc: 65.88%
+2025-03-20 13:45:28,947 - INFO - --------------------------------------------------
+2025-03-20 13:45:28,947 - INFO - Reducing learning rate to 0.0034999999999999996
+2025-03-20 13:45:28,947 - INFO - 
+Epoch 4/10
+2025-03-20 14:04:05,115 - INFO - 
+Epoch 4 Summary:
+2025-03-20 14:04:05,117 - INFO - Duration: 1116.17s
+2025-03-20 14:04:05,117 - INFO - Train Loss: 0.6750 | Acc: 57.37%
+2025-03-20 14:04:05,117 - INFO - Val Loss: 0.6491 | Acc: 66.18%
+2025-03-20 14:04:05,117 - INFO - --------------------------------------------------
+2025-03-20 14:04:05,117 - INFO - 
+Epoch 5/10
+2025-03-20 14:22:37,567 - INFO - 
+Epoch 5 Summary:
+2025-03-20 14:22:37,569 - INFO - Duration: 1112.45s
+2025-03-20 14:22:37,569 - INFO - Train Loss: 0.6716 | Acc: 56.63%
+2025-03-20 14:22:37,569 - INFO - Val Loss: 0.6850 | Acc: 54.71%
+2025-03-20 14:22:37,569 - INFO - --------------------------------------------------
+2025-03-20 14:22:37,569 - INFO - 
+Epoch 6/10
+2025-03-20 14:41:09,967 - INFO - 
+Epoch 6 Summary:
+2025-03-20 14:41:09,968 - INFO - Duration: 1112.40s
+2025-03-20 14:41:09,968 - INFO - Train Loss: 0.6647 | Acc: 60.00%
+2025-03-20 14:41:09,968 - INFO - Val Loss: 0.6541 | Acc: 66.18%
+2025-03-20 14:41:09,968 - INFO - --------------------------------------------------
+2025-03-20 14:41:09,968 - INFO - Reducing learning rate to 0.0017499999999999998
+2025-03-20 14:41:09,968 - INFO - 
+Epoch 7/10
+2025-03-20 14:59:42,965 - INFO - 
+Epoch 7 Summary:
+2025-03-20 14:59:42,966 - INFO - Duration: 1113.00s
+2025-03-20 14:59:42,966 - INFO - Train Loss: 0.6571 | Acc: 62.00%
+2025-03-20 14:59:42,966 - INFO - Val Loss: 0.6778 | Acc: 57.65%
+2025-03-20 14:59:42,966 - INFO - --------------------------------------------------
+2025-03-20 14:59:42,966 - INFO - 
+Epoch 8/10
+2025-03-20 15:18:22,309 - INFO - 
+Epoch 8 Summary:
+2025-03-20 15:18:22,310 - INFO - Duration: 1119.34s
+2025-03-20 15:18:22,310 - INFO - Train Loss: 0.6526 | Acc: 62.00%
+2025-03-20 15:18:22,310 - INFO - Val Loss: 0.6693 | Acc: 59.71%
+2025-03-20 15:18:22,310 - INFO - --------------------------------------------------
+2025-03-20 15:18:22,310 - INFO - 
+Epoch 9/10
+2025-03-20 15:36:57,825 - INFO - 
+Epoch 9 Summary:
+2025-03-20 15:36:57,827 - INFO - Duration: 1115.52s
+2025-03-20 15:36:57,827 - INFO - Train Loss: 0.6465 | Acc: 62.84%
+2025-03-20 15:36:57,827 - INFO - Val Loss: 0.6561 | Acc: 64.41%
+2025-03-20 15:36:57,827 - INFO - --------------------------------------------------
+2025-03-20 15:36:57,828 - INFO - Early stopping triggered after 9 epochs
+2025-03-20 15:36:57,835 - INFO - 
+======= Results for Grayscale_VeryDeepCNN =======
+2025-03-20 15:36:57,835 - INFO - Validation Accuracy: 64.41%
+2025-03-20 15:36:57,835 - INFO - Validation Loss: 0.6561
+2025-03-20 15:36:57,835 - INFO - Training Accuracy: 62.84%
+2025-03-20 15:36:57,835 - INFO - Training Loss: 0.6465
+2025-03-20 15:36:57,835 - INFO - Epoch Duration: 1115.52s
+2025-03-20 15:36:57,835 - INFO - ==================================================
+2025-03-20 15:36:57,835 - INFO - Configuration details:
+2025-03-20 15:36:57,835 - INFO -   - Image size: 56px
+2025-03-20 15:36:57,835 - INFO -   - Image format: Grayscale
+2025-03-20 15:36:57,835 - INFO -   - CNN depth: 3 convolutional blocks
+2025-03-20 15:36:57,835 - INFO -   - Kernels per layer: 64
+2025-03-20 15:36:57,836 - INFO - 
+======= Starting experiment: RGB_VeryDeepCNN =======
+2025-03-20 15:38:08,560 - INFO - Original dataset size: 955 training, 340 validation
+2025-03-20 15:38:08,560 - INFO - After balancing: 4778 training samples (equal class distribution)
+2025-03-20 15:38:08,560 - INFO - Final dataset size: 955 training, 340 validation
+2025-03-20 15:38:13,116 - INFO - 
+Model Architectures:
+2025-03-20 15:38:13,116 - INFO - Image CNN Architecture:
+2025-03-20 15:38:13,116 - INFO - [<framework.ConvolutionalLayer.ConvolutionalLayer object at 0x17e83ad20>, <framework.ReLULayer.ReLULayer object at 0x16df61bb0>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x17d943650>, <framework.ConvolutionalLayer.ConvolutionalLayer object at 0x17d8a4770>, <framework.ReLULayer.ReLULayer object at 0x17e86b530>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x17e86be90>, <framework.ConvolutionalLayer.ConvolutionalLayer object at 0x17e86b410>, <framework.ReLULayer.ReLULayer object at 0x17e86b740>, <framework.MaxPoolingLayer.MaxPoolingLayer object at 0x17e86a210>, <framework.FlatteningLayer.FlatteningLayer object at 0x16df620c0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17e86ae40>, <framework.ReLULayer.ReLULayer object at 0x17e8697f0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17e8687a0>]
+2025-03-20 15:38:13,116 - INFO - 
+Text CNN Architecture:
+2025-03-20 15:38:13,116 - INFO - [<framework.EmbeddingLayer.EmbeddingLayer object at 0x17d4768d0>, <framework.TransposeLayer.TransposeLayer object at 0x17e8685f0>, <framework.Conv1DLayer.Conv1DLayer object at 0x17e86b860>, <framework.ReLULayer.ReLULayer object at 0x17e86a3c0>, <framework.GlobalMaxPooling1DLayer.GlobalMaxPooling1DLayer object at 0x17e86bc20>, <framework.FlatteningLayer.FlatteningLayer object at 0x17e86a3f0>, <framework.FullyConnectedLayer.FullyConnectedLayer object at 0x17e86bbf0>]
+2025-03-20 15:38:13,116 - INFO - 
+Starting training...
+2025-03-20 15:38:13,116 - INFO - Starting training with:
+2025-03-20 15:38:13,116 - INFO - Epochs: 10
+2025-03-20 15:38:13,116 - INFO - Batch size: 64
+2025-03-20 15:38:13,116 - INFO - Learning rate: 0.005
+2025-03-20 15:38:13,116 - INFO - Image size: 56
+2025-03-20 15:38:13,116 - INFO - Conv blocks: 3
+2025-03-20 15:38:13,116 - INFO - Grayscale: False
+2025-03-20 15:38:13,116 - INFO - Num kernels: 64
+2025-03-20 15:38:13,116 - INFO - Using 20% of dataset: 955 training, 340 validation samples
+2025-03-20 15:38:13,116 - INFO - 
+Epoch 1/10
+2025-03-20 15:57:00,363 - INFO - 
+Epoch 1 Summary:
+2025-03-20 15:57:00,364 - INFO - Duration: 1127.25s
+2025-03-20 15:57:00,364 - INFO - Train Loss: 0.7822 | Acc: 47.96%
+2025-03-20 15:57:00,364 - INFO - Val Loss: 0.6508 | Acc: 63.82%
+2025-03-20 15:57:00,364 - INFO - --------------------------------------------------
+2025-03-20 15:57:00,364 - INFO - 
+Epoch 2/10
+2025-03-20 16:15:46,339 - INFO - 
+Epoch 2 Summary:
+2025-03-20 16:15:46,340 - INFO - Duration: 1125.98s
+2025-03-20 16:15:46,340 - INFO - Train Loss: 0.7129 | Acc: 50.79%
+2025-03-20 16:15:46,340 - INFO - Val Loss: 0.6665 | Acc: 63.82%
+2025-03-20 16:15:46,340 - INFO - --------------------------------------------------
+2025-03-20 16:15:46,341 - INFO - 
+Epoch 3/10
+2025-03-20 16:34:32,311 - INFO - 
+Epoch 3 Summary:
+2025-03-20 16:34:32,312 - INFO - Duration: 1125.97s
+2025-03-20 16:34:32,312 - INFO - Train Loss: 0.7022 | Acc: 50.47%
+2025-03-20 16:34:32,312 - INFO - Val Loss: 0.6654 | Acc: 63.82%
+2025-03-20 16:34:32,312 - INFO - --------------------------------------------------
+2025-03-20 16:34:32,312 - INFO - Reducing learning rate to 0.0034999999999999996
+2025-03-20 16:34:32,312 - INFO - 
+Epoch 4/10
+2025-03-20 16:53:18,350 - INFO - 
+Epoch 4 Summary:
+2025-03-20 16:53:18,350 - INFO - Duration: 1126.04s
+2025-03-20 16:53:18,351 - INFO - Train Loss: 0.6875 | Acc: 52.25%
+2025-03-20 16:53:18,351 - INFO - Val Loss: 0.6629 | Acc: 63.24%
+2025-03-20 16:53:18,351 - INFO - --------------------------------------------------
+2025-03-20 16:53:18,351 - INFO - 
+Epoch 5/10
+2025-03-20 17:12:01,686 - INFO - 
+Epoch 5 Summary:
+2025-03-20 17:12:01,687 - INFO - Duration: 1123.34s
+2025-03-20 17:12:01,687 - INFO - Train Loss: 0.6857 | Acc: 52.88%
+2025-03-20 17:12:01,687 - INFO - Val Loss: 0.7155 | Acc: 44.71%
+2025-03-20 17:12:01,687 - INFO - --------------------------------------------------
+2025-03-20 17:12:01,687 - INFO - 
+Epoch 6/10
+2025-03-20 17:30:52,012 - INFO - 
+Epoch 6 Summary:
+2025-03-20 17:30:52,013 - INFO - Duration: 1130.32s
+2025-03-20 17:30:52,013 - INFO - Train Loss: 0.6761 | Acc: 56.23%
+2025-03-20 17:30:52,013 - INFO - Val Loss: 0.7134 | Acc: 47.94%
+2025-03-20 17:30:52,013 - INFO - --------------------------------------------------
+2025-03-20 17:30:52,013 - INFO - Reducing learning rate to 0.0017499999999999998
+2025-03-20 17:30:52,013 - INFO - 
+Epoch 7/10
