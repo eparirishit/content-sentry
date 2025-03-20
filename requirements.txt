@@ -3,3 +3,4 @@ tqdm
 Pillow
 datasets
 torch
+matplotlib

@@ -34,7 +34,7 @@ else:
     logging.info("MPS not available. Falling back to CPU.")
 
 class HatefulMemesDataset:
-    def _init_(self, dataset, vocab, config, is_train=True):
+    def __init__(self, dataset, vocab, config, is_train=True):
         self.dataset = dataset
         self.vocab = vocab
         self.config = config
@@ -46,7 +46,7 @@ class HatefulMemesDataset:
         self.grayscale = config['grayscale']
         self.channels = 1 if self.grayscale else 3
 
-    def _len_(self):
+    def __len__(self):
         return len(self.dataset)
 
     def preprocess_image(self, img):
@@ -55,6 +55,25 @@ class HatefulMemesDataset:
             img = img.convert('L')
         else:
             img = img.convert('RGB')
+            
+        # Add simple data augmentation during training
+        if self.is_train:
+            # Random horizontal flip with 50% probability
+            if np.random.rand() > 0.5:
+                img = img.transpose(Image.FLIP_LEFT_RIGHT)
+            
+            # Random brightness/contrast adjustments
+            from PIL import ImageEnhance
+            if np.random.rand() > 0.5:
+                factor = np.random.uniform(0.8, 1.2)
+                enhancer = ImageEnhance.Brightness(img)
+                img = enhancer.enhance(factor)
+                
+            if np.random.rand() > 0.5:
+                factor = np.random.uniform(0.8, 1.2)
+                enhancer = ImageEnhance.Contrast(img)
+                img = enhancer.enhance(factor)
+                
         img = img.resize((self.img_size, self.img_size))
         arr = np.array(img) / 255.0
         if self.grayscale:
@@ -73,7 +92,7 @@ class HatefulMemesDataset:
             indices = indices[:self.max_length]
         return np.array(indices)  # Removed .reshape(-1, 1)
 
-    def _getitem_(self, idx):
+    def __getitem__(self, idx):
         item = self.dataset[idx]
         image = self.preprocess_image(item['image'])
         text = self.preprocess_text(item['text'])
@@ -81,17 +100,17 @@ class HatefulMemesDataset:
         return image, text, label
 
 class DataLoader:
-    def _init_(self, dataset, batch_size=32, shuffle=True):
+    def __init__(self, dataset, batch_size=32, shuffle=True):
         self.dataset = dataset
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.indices = np.arange(len(dataset))
         
-    def _len_(self):
+    def __len__(self):
         """Return the number of batches in the dataset"""
         return (len(self.dataset) + self.batch_size - 1) // self.batch_size
     
-    def _iter_(self):
+    def __iter__(self):
         if self.shuffle:
             np.random.shuffle(self.indices)
             
@@ -100,7 +119,7 @@ class DataLoader:
             images, texts, labels = [], [], []
             
             for idx in batch_indices:
-                img, txt, lbl = self.dataset[idx]
+                img, txt, lbl = self.dataset.__getitem__(idx)
                 images.append(img)
                 texts.append(txt)
                 labels.append(lbl)
@@ -199,10 +218,10 @@ def train(model_config=None):
         
     # Training parameters
     batch_size = 128  # Increased from 64
-    epochs = 5  # Reduced from 5
+    epochs = 10  # Reduced from 5
     lr = 0.01
     initial_lr = 0.01
-    lr_scheduler = lambda epoch: initial_lr * (0.7 ** epoch)  # Decay learning rate
+    lr_scheduler = lambda epoch: initial_lr / (1 + 0.2 * epoch)  # Decay learning rate
     loss_fn = CrossEntropy()
     
     # Create data loaders
@@ -388,18 +407,21 @@ def plot_experiment_results(results, output_dir="experiment_plots"):
         plt.savefig(f"{output_dir}/{name}accuracy{timestamp}.png", dpi=300)
         logging.info(f"Saved {name} accuracy plot to {output_dir}/{name}accuracy{timestamp}.png")
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     # Define experiments to run
     experiments = [
         # Original experiments
         {"name": "Grayscale_SimpleCNN", "grayscale": True, "num_kernels": 8, "num_conv_blocks": 1, "use_batchnorm": False},
-        {"name": "RGB_SimpleCNN", "grayscale": False, "num_kernels": 8, "num_conv_blocks": 1, "use_batchnorm": False},
+        # {"name": "RGB_SimpleCNN", "grayscale": False, "num_kernels": 8, "num_conv_blocks": 1, "use_batchnorm": False},
         {"name": "Grayscale_MultiKernel", "grayscale": True, "num_kernels": 32, "num_conv_blocks": 1, "use_batchnorm": False},
-        {"name": "RGB_DeepCNN", "grayscale": False, "num_kernels": 16, "num_conv_blocks": 3, "use_batchnorm": False},
+        # {"name": "RGB_DeepCNN", "grayscale": False, "num_kernels": 16, "num_conv_blocks": 3, "use_batchnorm": False},
         
-        # New optimized experiment based on RGB_SimpleCNN (best performer)
-        {"name": "RGB_OptimizedCNN", "grayscale": False, "num_kernels": 16, "num_conv_blocks": 2, 
-         "use_batchnorm": True, "increase_channels": True}
+        {"name": "RGB_SimpleCNN", "grayscale": False, "num_kernels": 8, "num_conv_blocks": 1, 
+     "use_batchnorm": True, "increase_channels": False},
+     
+        # Optimized CNN with batch normalization and channel increase
+        {"name": "RGB_DeepCNN", "grayscale": False, "num_kernels": 16, "num_conv_blocks": 2, 
+        "use_batchnorm": True, "increase_channels": True}
     ]
 
     # Results dictionary
@@ -412,7 +434,9 @@ if _name_ == "_main_":
             'img_size': 64,
             'grayscale': config['grayscale'],
             'num_conv_blocks': config['num_conv_blocks'], 
-            'num_kernels': config['num_kernels']
+            'num_kernels': config['num_kernels'],
+            'use_batchnorm': config.get('use_batchnorm', False),  # Propagate batch norm setting
+            'increase_channels': config.get('increase_channels', False)  # Propagate channel increase
         }
         
         # Train and evaluate with this configuration
