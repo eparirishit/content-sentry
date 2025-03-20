@@ -54,15 +54,28 @@ class ConvolutionalLayer(Layer):
         return None
 
     def backward(self, gradIn):
-        # Not fully implemented. For training, use updateKernels() with the gradient from later layers.
+        # Store the gradient for later use in updateKernels
+        self.stored_gradient = gradIn
         return gradIn
 
     def updateKernels(self, gradIn, eta):
         """
         Updates the kernel weights using the gradient from the next layer.
-        gradIn: gradient from the next layer (shape: (batch, num_kernels, out_height, out_width))
-        eta: learning rate
+        
+        Parameters:
+          gradIn: gradient from the next layer (shape: (batch, num_kernels, out_height, out_width))
+                 If None, uses stored gradient from backward pass (if available)
+          eta: learning rate
         """
+        # Handle the case when gradIn is None
+        if gradIn is None:
+            # If we have a stored gradient from backward pass, use it
+            if hasattr(self, 'stored_gradient') and self.stored_gradient is not None:
+                gradIn = self.stored_gradient
+            else:
+                # If no gradient is available, we can't update
+                return
+        
         batch_size = self.getPrevIn().shape[0]
         k = self.kernel_size
         out_H = gradIn.shape[2]
@@ -78,3 +91,14 @@ class ConvolutionalLayer(Layer):
         self.kernels -= eta * dK / batch_size
         dB = np.sum(gradIn, axis=(0,2,3)) / batch_size
         self.biases -= eta * dB
+        
+        # Clear stored gradient after update
+        if hasattr(self, 'stored_gradient'):
+            self.stored_gradient = None
+    
+    def update_weights(self, learning_rate):
+        """
+        Update weights method for API consistency with other layers.
+        Calls updateKernels with the stored gradient.
+        """
+        self.updateKernels(None, learning_rate)
