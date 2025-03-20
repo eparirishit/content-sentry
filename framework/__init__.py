@@ -15,3 +15,4 @@ from .EmbeddingLayer import EmbeddingLayer
 from .Conv1DLayer import Conv1DLayer
 from .GlobalMaxPooling1DLayer import GlobalMaxPooling1DLayer
 from .TransposeLayer import TransposeLayer
+from .BatchNormalizationLayer import BatchNormalizationLayer

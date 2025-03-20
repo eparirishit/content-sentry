@@ -1,9 +1,8 @@
 from framework import (
     EmbeddingLayer, TransposeLayer, Conv1DLayer,
     ReLULayer, GlobalMaxPooling1DLayer,
-    FlatteningLayer, FullyConnectedLayer
+    FlatteningLayer, FullyConnectedLayer, BatchNormalizationLayer
 )
-
 
 class TextCNN:
     def __repr__(self):
@@ -12,16 +11,53 @@ class TextCNN:
             *[f"- {layer.__class__.__name__}" for layer in self.layers]
         ])
     
-    def __init__(self, vocab_size, max_length=20):
+    def __init__(self, vocab_size, max_length=20, embedding_dim=128, use_batchnorm=True):
+        self.device = None
+        
+        # Create multiple conv filters of different sizes to capture different n-gram patterns
         self.layers = [
-            EmbeddingLayer(vocab_size, 100),
+            EmbeddingLayer(vocab_size, embedding_dim),
             TransposeLayer((0, 2, 1)),
-            Conv1DLayer(100, 128, 5),
+        ]
+        
+        # Multiple parallel convolutional filters with different kernel sizes
+        filter_sizes = [3, 4, 5]  # capture 3-grams, 4-grams, and 5-grams
+        num_filters = 64  # filters per size
+        
+        # First conv path (3-gram)
+        conv1 = [
+            Conv1DLayer(embedding_dim, num_filters, filter_sizes[0]),
             ReLULayer(),
             GlobalMaxPooling1DLayer(),
-            FlatteningLayer(),
-            FullyConnectedLayer(128, 64)
         ]
+        
+        # Second conv path (4-gram)
+        conv2 = [
+            Conv1DLayer(embedding_dim, num_filters, filter_sizes[1]),
+            ReLULayer(),
+            GlobalMaxPooling1DLayer(),
+        ]
+        
+        # Third conv path (5-gram)
+        conv3 = [
+            Conv1DLayer(embedding_dim, num_filters, filter_sizes[2]),
+            ReLULayer(),
+            GlobalMaxPooling1DLayer(),
+        ]
+        
+        # Add all convolutional paths
+        self.layers.extend(conv1)
+        
+        # Add fully connected layers
+        self.layers.extend([
+            FlatteningLayer(),
+            FullyConnectedLayer(num_filters, 64),  
+        ])
+        
+        if use_batchnorm:
+            self.layers.append(BatchNormalizationLayer(64))
+            
+        self.layers.append(ReLULayer())
 
     def forward(self, x):
         for layer in self.layers:
@@ -43,5 +79,5 @@ class TextCNN:
         for layer in self.layers:
             if hasattr(layer, 'updateWeightsWithMomentum'):
                 layer.updateWeightsWithMomentum(learning_rate, beta1, beta2, epsilon, momentum, velocity)
-            elif hasattr(layer, 'updateWeights'):  # Fallback for layers without momentum support
-                layer.updateWeights(learning_rate)
+            elif hasattr(layer, 'update_weights'):  # Fallback for layers without momentum support
+                layer.update_weights(learning_rate)

@@ -14,8 +14,6 @@ from models.image_cnn import ImageCNN
 from models.text_cnn import TextCNN
 from models.multimodal import MultimodalModel
 from framework import CrossEntropy
-import random
-import torchvision.transforms as transforms
 
 # Configure logging
 logging.basicConfig(
@@ -36,36 +34,22 @@ else:
     logging.info("MPS not available. Falling back to CPU.")
 
 class HatefulMemesDataset:
-    def __init__(self, dataset, vocab, config, is_train=True):
+    def _init_(self, dataset, vocab, config, is_train=True):
         self.dataset = dataset
         self.vocab = vocab
         self.config = config
         self.is_train = is_train
-        self.max_length = 30  # Increased from 20
+        self.max_length = 20
         self.img_size = config['img_size']
         
         # Image transforms
         self.grayscale = config['grayscale']
         self.channels = 1 if self.grayscale else 3
-        
-        # Data augmentation for training
-        if self.is_train:
-            self.transforms = transforms.Compose([
-                transforms.RandomResizedCrop(self.img_size, scale=(0.8, 1.0)),
-                transforms.RandomHorizontalFlip(),
-                transforms.ColorJitter(brightness=0.2, contrast=0.2)
-            ])
-        else:
-            self.transforms = None
 
-    def __len__(self):
+    def _len_(self):
         return len(self.dataset)
 
     def preprocess_image(self, img):
-        # Apply data augmentation if in training mode
-        if self.is_train and self.transforms:
-            img = self.transforms(img)
-            
         # Convert to grayscale/RGB and resize
         if self.grayscale:
             img = img.convert('L')
@@ -73,10 +57,6 @@ class HatefulMemesDataset:
             img = img.convert('RGB')
         img = img.resize((self.img_size, self.img_size))
         arr = np.array(img) / 255.0
-        
-        # Standardize images (normalize to mean=0, std=1)
-        arr = (arr - arr.mean()) / (arr.std() + 1e-8)
-        
         if self.grayscale:
             arr = arr[None, ...]
         else:
@@ -91,9 +71,9 @@ class HatefulMemesDataset:
             indices += [0] * (self.max_length - len(indices))
         else:
             indices = indices[:self.max_length]
-        return np.array(indices)
+        return np.array(indices)  # Removed .reshape(-1, 1)
 
-    def __getitem__(self, idx):
+    def _getitem_(self, idx):
         item = self.dataset[idx]
         image = self.preprocess_image(item['image'])
         text = self.preprocess_text(item['text'])
@@ -101,17 +81,17 @@ class HatefulMemesDataset:
         return image, text, label
 
 class DataLoader:
-    def __init__(self, dataset, batch_size=32, shuffle=True):
+    def _init_(self, dataset, batch_size=32, shuffle=True):
         self.dataset = dataset
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.indices = np.arange(len(dataset))
         
-    def __len__(self):
+    def _len_(self):
         """Return the number of batches in the dataset"""
         return (len(self.dataset) + self.batch_size - 1) // self.batch_size
     
-    def __iter__(self):
+    def _iter_(self):
         if self.shuffle:
             np.random.shuffle(self.indices)
             
@@ -191,12 +171,10 @@ def train(model_config=None):
     # Use provided model config or default
     if model_config is None:
         model_config = {
-            'img_size': 128,  # Increased from 32
+            'img_size': 32,
             'grayscale': True,
-            'num_conv_blocks': 3,  # Increased from 2
-            'num_kernels': 64,  # Increased from 32
-            'dropout_rate': 0.5,
-            'use_batch_norm': True
+            'num_conv_blocks': 2,
+            'num_kernels': 32
         }
     
     # Create datasets
@@ -220,9 +198,11 @@ def train(model_config=None):
     logging.info("\nStarting training...")
         
     # Training parameters
-    batch_size = 64  # Reduced for better stability
-    epochs = 10  # Increased from 5
-    lr = 0.001  # Reduced from 0.01
+    batch_size = 128  # Increased from 64
+    epochs = 5  # Reduced from 5
+    lr = 0.01
+    initial_lr = 0.01
+    lr_scheduler = lambda epoch: initial_lr * (0.7 ** epoch)  # Decay learning rate
     loss_fn = CrossEntropy()
     
     # Create data loaders
@@ -247,14 +227,6 @@ def train(model_config=None):
     val_accs = []
     epoch_times = []
     
-    # Initialize best validation accuracy for early stopping
-    best_val_acc = 0
-    patience = 3
-    patience_counter = 0
-    
-    # Learning rate scheduler: reduce LR by 0.5 every 3 epochs
-    lr_schedule = {3: 0.5, 6: 0.5, 9: 0.5}
-    
     # Training loop
     for epoch in range(epochs):
         epoch_start = time.time()
@@ -262,10 +234,9 @@ def train(model_config=None):
         correct = 0
         total = 0
         
-        # Apply learning rate schedule
-        if epoch in lr_schedule:
-            lr *= lr_schedule[epoch]
-            logger.info(f"Reducing learning rate to {lr}")
+        # Update learning rate
+        current_lr = lr_scheduler(epoch)
+        logger.info(f"Current learning rate: {current_lr:.6f}")
 
         # Training
         model.train()
@@ -288,20 +259,10 @@ def train(model_config=None):
             grad = loss_fn.gradient(labels_np, preds_np)
             model.backward(grad)
             
-            # Update weights with Adam-like momentum
-            beta1 = 0.9
-            beta2 = 0.999
-            epsilon = 1e-8
-            
-            # Initialize momentum and velocity if not present
-            if not hasattr(model, 'momentum'):
-                model.momentum = {}
-                model.velocity = {}
-                
-            # Update with Adam-like momentum (simplified version)
-            model.fc.updateWeightsWithMomentum(lr, beta1, beta2, epsilon, model.momentum, model.velocity)
-            model.image_model.update_weights_with_momentum(lr, beta1, beta2, epsilon, model.momentum, model.velocity)
-            model.text_model.update_weights_with_momentum(lr, beta1, beta2, epsilon, model.momentum, model.velocity)
+            # Update weights with current learning rate
+            model.fc.updateWeights(current_lr)
+            model.image_model.update_weights(current_lr)
+            model.text_model.update_weights(current_lr)
             
             # Calculate metrics - properly move to CPU before NumPy conversion
             correct += ((preds_np > 0.5) == labels_np).sum()
@@ -345,17 +306,6 @@ def train(model_config=None):
         logger.info(f"Train Loss: {avg_train_loss:.4f} | Acc: {train_acc:.2%}")
         logger.info(f"Val Loss: {avg_val_loss:.4f} | Acc: {val_acc:.2%}")
         logger.info("-" * 50)
-        
-        # Early stopping
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
-            patience_counter = 0
-            # Save best model weights here if needed
-        else:
-            patience_counter += 1
-            if patience_counter >= patience:
-                logger.info(f"Early stopping triggered after {epoch+1} epochs")
-                break
     
     # Return final validation metrics
     final_metrics = {
@@ -435,20 +385,21 @@ def plot_experiment_results(results, output_dir="experiment_plots"):
         plt.legend()
         
         # Save the figure
-        plt.savefig(f"{output_dir}/{name}_accuracy_{timestamp}.png", dpi=300)
-        logging.info(f"Saved {name} accuracy plot to {output_dir}/{name}_accuracy_{timestamp}.png")
+        plt.savefig(f"{output_dir}/{name}accuracy{timestamp}.png", dpi=300)
+        logging.info(f"Saved {name} accuracy plot to {output_dir}/{name}accuracy{timestamp}.png")
 
-if __name__ == "__main__":
-    # Define experiments to run with improved configurations
+if _name_ == "_main_":
+    # Define experiments to run
     experiments = [
-        {"name": "Grayscale_DeepCNN", "grayscale": True, "num_kernels": 32, "num_conv_blocks": 3, 
-         "dropout_rate": 0.5, "use_batch_norm": True},
-        {"name": "RGB_DeepCNN", "grayscale": False, "num_kernels": 32, "num_conv_blocks": 3,
-         "dropout_rate": 0.5, "use_batch_norm": True},
-        {"name": "Grayscale_VeryDeepCNN", "grayscale": True, "num_kernels": 64, "num_conv_blocks": 4,
-         "dropout_rate": 0.5, "use_batch_norm": True},
-        {"name": "RGB_VeryDeepCNN", "grayscale": False, "num_kernels": 64, "num_conv_blocks": 4,
-         "dropout_rate": 0.5, "use_batch_norm": True}
+        # Original experiments
+        {"name": "Grayscale_SimpleCNN", "grayscale": True, "num_kernels": 8, "num_conv_blocks": 1, "use_batchnorm": False},
+        {"name": "RGB_SimpleCNN", "grayscale": False, "num_kernels": 8, "num_conv_blocks": 1, "use_batchnorm": False},
+        {"name": "Grayscale_MultiKernel", "grayscale": True, "num_kernels": 32, "num_conv_blocks": 1, "use_batchnorm": False},
+        {"name": "RGB_DeepCNN", "grayscale": False, "num_kernels": 16, "num_conv_blocks": 3, "use_batchnorm": False},
+        
+        # New optimized experiment based on RGB_SimpleCNN (best performer)
+        {"name": "RGB_OptimizedCNN", "grayscale": False, "num_kernels": 16, "num_conv_blocks": 2, 
+         "use_batchnorm": True, "increase_channels": True}
     ]
 
     # Results dictionary
@@ -458,12 +409,10 @@ if __name__ == "__main__":
         logging.info(f"\n======= Starting experiment: {config['name']} =======")
         # Set up the configuration
         model_config = {
-            'img_size': 128,  # Increased from 64
+            'img_size': 64,
             'grayscale': config['grayscale'],
             'num_conv_blocks': config['num_conv_blocks'], 
-            'num_kernels': config['num_kernels'],
-            'dropout_rate': config['dropout_rate'],
-            'use_batch_norm': config['use_batch_norm']
+            'num_kernels': config['num_kernels']
         }
         
         # Train and evaluate with this configuration
