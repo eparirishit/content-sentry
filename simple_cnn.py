@@ -14,20 +14,16 @@ from models.image_cnn import ImageCNN
 from models.text_cnn import TextCNN
 from models.multimodal import MultimodalModel
 from framework import CrossEntropy
-import random
-import torchvision.transforms as transforms
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('training2.log'),
+        logging.FileHandler('training.log'),
         logging.StreamHandler()
     ]
 )
 
-# Configure device
 if torch.backends.mps.is_available():
     device = torch.device('mps')
     logging.info("Using Apple Silicon optimized Metal Performance Shaders (MPS) backend.")
@@ -36,53 +32,72 @@ else:
     logging.info("MPS not available. Falling back to CPU.")
 
 class HatefulMemesDataset:
+    """
+    Dataset class for the Hateful Memes dataset.
+    
+    Handles loading and preprocessing of image and text data.
+    """
     def __init__(self, dataset, vocab, config, is_train=True):
+        """
+        Initialize the dataset.
+        
+        Args:
+            dataset: Source dataset with image and text pairs
+            vocab: Vocabulary mapping for text processing
+            config: Configuration dictionary for image processing
+            is_train: Whether this is training data (for augmentation)
+        """
         self.dataset = dataset
         self.vocab = vocab
         self.config = config
         self.is_train = is_train
-        self.max_length = 25  # Compromise between 30 and 20
+        self.max_length = 20
         self.img_size = config['img_size']
         
         # Image transforms
         self.grayscale = config['grayscale']
         self.channels = 1 if self.grayscale else 3
-        
-        # More effective data augmentation
-        if self.is_train:
-            self.transforms = transforms.Compose([
-                transforms.RandomHorizontalFlip(),
-                transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.1),
-                transforms.RandomAffine(degrees=5, translate=(0.05, 0.05), scale=(0.95, 1.05))
-            ])
-        else:
-            self.transforms = None
 
     def __len__(self):
+        """Return the number of examples in the dataset."""
         return len(self.dataset)
 
     def preprocess_image(self, img):
-        # Apply data augmentation if in training mode
-        if self.is_train and self.transforms:
-            img = self.transforms(img)
+        """
+        Preprocess image data for model input.
+        
+        Args:
+            img: PIL Image object
             
+        Returns:
+            Processed image as numpy array
+        """
         # Convert to grayscale/RGB and resize
         if self.grayscale:
             img = img.convert('L')
         else:
             img = img.convert('RGB')
+            
+        # Add simple data augmentation during training
+        if self.is_train:
+            # Random horizontal flip with 50% probability
+            if np.random.rand() > 0.5:
+                img = img.transpose(Image.FLIP_LEFT_RIGHT)
+            
+            # Random brightness/contrast adjustments
+            from PIL import ImageEnhance
+            if np.random.rand() > 0.5:
+                factor = np.random.uniform(0.8, 1.2)
+                enhancer = ImageEnhance.Brightness(img)
+                img = enhancer.enhance(factor)
+                
+            if np.random.rand() > 0.5:
+                factor = np.random.uniform(0.8, 1.2)
+                enhancer = ImageEnhance.Contrast(img)
+                img = enhancer.enhance(factor)
+                
         img = img.resize((self.img_size, self.img_size))
         arr = np.array(img) / 255.0
-        
-        # Fix double normalization bug - only normalize once
-        arr = np.array(img) / 255.0
-        
-        # Proper normalization - standardize to improve convergence
-        mean = arr.mean()
-        std = arr.std() + 1e-8  # Avoid division by zero
-        arr = (arr - mean) / std
-        
-        # Only do basic normalization for speed
         if self.grayscale:
             arr = arr[None, ...]
         else:
@@ -90,6 +105,15 @@ class HatefulMemesDataset:
         return arr.astype(np.float32)
 
     def preprocess_text(self, text):
+        """
+        Preprocess text data for model input.
+        
+        Args:
+            text: Raw text string
+            
+        Returns:
+            Token indices as numpy array
+        """
         tokens = text.lower().split()[:self.max_length]
         indices = [self.vocab.get(t, 1) for t in tokens]
 
@@ -100,6 +124,15 @@ class HatefulMemesDataset:
         return np.array(indices)
 
     def __getitem__(self, idx):
+        """
+        Get a single example from the dataset.
+        
+        Args:
+            idx: Index of the example
+            
+        Returns:
+            Tuple of (image, text, label)
+        """
         item = self.dataset[idx]
         image = self.preprocess_image(item['image'])
         text = self.preprocess_text(item['text'])
@@ -107,7 +140,20 @@ class HatefulMemesDataset:
         return image, text, label
 
 class DataLoader:
+    """
+    Custom data loader for batched processing.
+    
+    Handles batching and optional shuffling of dataset examples.
+    """
     def __init__(self, dataset, batch_size=32, shuffle=True):
+        """
+        Initialize the data loader.
+        
+        Args:
+            dataset: Dataset to load from
+            batch_size: Number of examples per batch
+            shuffle: Whether to shuffle the data
+        """
         self.dataset = dataset
         self.batch_size = batch_size
         self.shuffle = shuffle
@@ -118,6 +164,12 @@ class DataLoader:
         return (len(self.dataset) + self.batch_size - 1) // self.batch_size
     
     def __iter__(self):
+        """
+        Iterate through the dataset in batches.
+        
+        Yields:
+            Tuple of (images, texts, labels) for each batch
+        """
         if self.shuffle:
             np.random.shuffle(self.indices)
             
@@ -126,7 +178,7 @@ class DataLoader:
             images, texts, labels = [], [], []
             
             for idx in batch_indices:
-                img, txt, lbl = self.dataset[idx]
+                img, txt, lbl = self.dataset.__getitem__(idx)
                 images.append(img)
                 texts.append(txt)
                 labels.append(lbl)
@@ -138,91 +190,88 @@ class DataLoader:
             )
 
 def build_vocab(dataset, max_vocab=10000):
+    """
+    Build vocabulary mapping from dataset text.
+    
+    Args:
+        dataset: Dataset with text examples
+        max_vocab: Maximum vocabulary size
+        
+    Returns:
+        Dictionary mapping words to indices
+    """
     vocab = {'<pad>': 0, '<unk>': 1}
     word_counts = {}
-    
-    # Use a decent subset for vocabulary building
-    subset_size = min(8000, len(dataset))
-    subset_indices = np.random.choice(len(dataset), subset_size, replace=False)
-    # Convert NumPy integers to Python integers
-    subset_indices = [int(i) for i in subset_indices]
-    subset = [dataset[i] for i in subset_indices]
-    
-    for example in subset:
+    for example in dataset:
         tokens = example['text'].lower().split()
         for token in tokens:
             word_counts[token] = word_counts.get(token, 0) + 1
     
-    # Sort by frequency
     sorted_words = sorted(word_counts.items(), key=lambda x: -x[1])
-    # Use 6000 words - good compromise between 8000 and 5000
     for word, _ in sorted_words[:max_vocab-2]:
         vocab[word] = len(vocab)
     return vocab
 
 def safe_to_numpy(x):
-    """Safely convert tensors to NumPy arrays regardless of device"""
+    """
+    Safely convert tensors to NumPy arrays regardless of device.
+    
+    Args:
+        x: Tensor or array-like object
+        
+    Returns:
+        NumPy array version of input
+    """
     if isinstance(x, torch.Tensor):
         return x.detach().cpu().numpy()
     return x
 
 def train(model_config=None):
+    """
+    Train a multimodal model on the Hateful Memes dataset.
+    
+    Args:
+        model_config: Configuration dictionary for model architecture
+        
+    Returns:
+        Dictionary of training metrics
+    """
     # Load dataset
     ds = load_dataset("Multimodal-Fatima/Hatefulmemes_train")
     train_val = ds['train'].train_test_split(test_size=0.2)
     train_data = train_val['train']
     val_data = train_val['test']
     
-    # First, balance the dataset to have 3000 entries for each label
     hateful = [i for i, item in enumerate(train_data) if item['label'] == 1]
     non_hateful = [i for i, item in enumerate(train_data) if item['label'] == 0]
     
-    # Use more samples from each class
-    sample_size = min(2500, len(hateful), len(non_hateful))  # Increased from 2000
+    sample_size = min(3000, len(hateful), len(non_hateful))
     hateful_indices = np.random.choice(hateful, size=sample_size, replace=False)
     non_hateful_indices = np.random.choice(non_hateful, size=sample_size, replace=False)
     
-    # Convert NumPy integers to Python integers for dataset indexing
-    hateful_indices = [int(i) for i in hateful_indices]
-    non_hateful_indices = [int(i) for i in non_hateful_indices]
-    
-    # Combine the balanced indices and create a new balanced dataset
     balanced_indices = np.concatenate([hateful_indices, non_hateful_indices])
-    # Convert to Python integers again after concatenation
-    balanced_indices = [int(i) for i in balanced_indices]
     balanced_train_data = train_data.select(balanced_indices)
     
-    # Use more data for training - 30% instead of 20%
-    sample_ratio = 0.2  # Increased from 0.2
+    sample_ratio = 0.5
     train_size = int(len(balanced_train_data) * sample_ratio)
     val_size = int(len(val_data) * sample_ratio)
     train_indices = np.random.choice(len(balanced_train_data), size=train_size, replace=False)
     val_indices = np.random.choice(len(val_data), size=val_size, replace=False)
-    
-    # Convert NumPy integers to Python integers before using with select()
-    train_indices = [int(i) for i in train_indices]
-    val_indices = [int(i) for i in val_indices]
-    
     train_data = balanced_train_data.select(train_indices)
     val_data = val_data.select(val_indices)
     
-    # Log dataset statistics
     logging.info(f"Original dataset size: {len(train_data)} training, {len(val_data)} validation")
     logging.info(f"After balancing: {len(balanced_train_data)} training samples (equal class distribution)")
     logging.info(f"Final dataset size: {len(train_data)} training, {len(val_data)} validation")
     
-    # Build vocabulary with a reasonable size
-    vocab = build_vocab(train_data, max_vocab=8000)  # Increased from 6000
+    vocab = build_vocab(train_data, max_vocab=8000)
     
-    # Use provided model config or default
     if model_config is None:
         model_config = {
-            'img_size': 56,  # Increased from 48
+            'img_size': 32,
             'grayscale': True,
-            'num_conv_blocks': 2,  # Reduced for speed
-            'num_kernels': 64,  # Increased from 48
-            'dropout_rate': 0.5,  # Moderate regularization
-            'use_batch_norm': True  # Re-enabled for better training
+            'num_conv_blocks': 2,
+            'num_kernels': 32
         }
     
     # Create datasets
@@ -234,7 +283,6 @@ def train(model_config=None):
     text_cnn = TextCNN(len(vocab))
     model = MultimodalModel(image_cnn, text_cnn)
 
-    # Ensure all model parameters and tensors are moved to the correct device
     model.image_model.device = device
     model.text_model.device = device
     
@@ -246,9 +294,11 @@ def train(model_config=None):
     logging.info("\nStarting training...")
         
     # Training parameters
-    batch_size = 64  # Reduced from 96 for better stability
-    epochs = 10  # More epochs with early stopping 
-    lr = 0.005  # Lower starting learning rate
+    batch_size = 128
+    epochs = 10
+    lr = 0.01
+    initial_lr = 0.01
+    lr_scheduler = lambda epoch: initial_lr / (1 + 0.2 * epoch)
     loss_fn = CrossEntropy()
     
     # Create data loaders
@@ -266,20 +316,12 @@ def train(model_config=None):
     logger.info(f"Num kernels: {model_config['num_kernels']}")
     logger.info(f"Using {sample_ratio*100:.0f}% of dataset: {train_size} training, {val_size} validation samples")
 
-    # Track metrics per epoch for plotting
+
     train_losses = []
     val_losses = []
     train_accs = []
     val_accs = []
     epoch_times = []
-    
-    # Initialize best validation accuracy for early stopping
-    best_val_acc = 0
-    patience = 3
-    patience_counter = 0
-    
-    # Improved learning rate schedule - more gradual decay
-    lr_schedule = {3: 0.7, 6: 0.5, 9: 0.3, 12: 0.1}
     
     # Training loop
     for epoch in range(epochs):
@@ -288,55 +330,35 @@ def train(model_config=None):
         correct = 0
         total = 0
         
-        # Apply learning rate schedule
-        if epoch in lr_schedule:
-            lr *= lr_schedule[epoch]
-            logger.info(f"Reducing learning rate to {lr}")
+        current_lr = lr_scheduler(epoch)
+        logger.info(f"Current learning rate: {current_lr:.6f}")
 
         # Training
         model.train()
         logger.info(f"\nEpoch {epoch+1}/{epochs}")
 
-        # Process all training batches for better learning
-        total_batches = len(train_loader)
-        batches_to_process = int(total_batches * 1.0)  # Process 100% of batches
-        
-        for batch_idx, (images, texts, labels) in enumerate(tqdm(train_loader, desc="Training", total=batches_to_process)):
-            if batch_idx >= batches_to_process:
-                break
-            
-            # Convert inputs to tensors on the right device
+        for batch_idx, (images, texts, labels) in enumerate(tqdm(train_loader, desc="Training")):
+            # Convert inputs to tensors
             images = torch.tensor(images).to(device)
             texts = torch.tensor(texts).to(device)
             labels = torch.tensor(labels).to(device)
             
-            # Forward pass - ensure we're passing CPU numpy arrays where needed
+            # Forward pass
             preds = model.forward(safe_to_numpy(images), safe_to_numpy(texts))
             labels_np = safe_to_numpy(labels)
             preds_np = safe_to_numpy(preds)
             loss = loss_fn.eval(labels_np, preds_np)
             train_loss += loss
             
-            # Backward pass with numpy arrays
+            # Backward pass
             grad = loss_fn.gradient(labels_np, preds_np)
             model.backward(grad)
             
-            # Update weights with Adam-like momentum
-            beta1 = 0.9
-            beta2 = 0.999
-            epsilon = 1e-8
+            # Update weights with current learning rate
+            model.fc.updateWeights(current_lr)
+            model.image_model.update_weights(current_lr)
+            model.text_model.update_weights(current_lr)
             
-            # Initialize momentum and velocity if not present
-            if not hasattr(model, 'momentum'):
-                model.momentum = {}
-                model.velocity = {}
-                
-            # Update with Adam-like momentum (simplified version)
-            model.fc.updateWeightsWithMomentum(lr, beta1, beta2, epsilon, model.momentum, model.velocity)
-            model.image_model.update_weights_with_momentum(lr, beta1, beta2, epsilon, model.momentum, model.velocity)
-            model.text_model.update_weights_with_momentum(lr, beta1, beta2, epsilon, model.momentum, model.velocity)
-            
-            # Calculate metrics - properly move to CPU before NumPy conversion
             correct += ((preds_np > 0.5) == labels_np).sum()
             total += labels.shape[0]
 
@@ -347,13 +369,7 @@ def train(model_config=None):
         val_total = 0
         
         model.eval()
-        # Process all validation batches for accurate evaluation
-        val_batches_to_process = int(len(val_loader) * 1.0)  # Process 100% of validation
-        
-        for batch_idx, (images, texts, labels) in enumerate(tqdm(val_loader, desc="Validation", total=val_batches_to_process)):
-            if batch_idx >= val_batches_to_process:
-                break
-            
+        for images, texts, labels in tqdm(val_loader, desc="Validation"):
             images = torch.tensor(images).to(device)
             texts = torch.tensor(texts).to(device)
             labels = torch.tensor(labels).to(device)
@@ -372,7 +388,6 @@ def train(model_config=None):
         val_acc = val_correct / val_total
         epoch_duration = time.time() - epoch_start
         
-        # Store metrics for plotting
         train_losses.append(avg_train_loss)
         train_accs.append(train_acc)
         val_losses.append(avg_val_loss)
@@ -384,20 +399,7 @@ def train(model_config=None):
         logger.info(f"Train Loss: {avg_train_loss:.4f} | Acc: {train_acc:.2%}")
         logger.info(f"Val Loss: {avg_val_loss:.4f} | Acc: {val_acc:.2%}")
         logger.info("-" * 50)
-        
-        # Improved early stopping that allows for more exploration
-        if epoch < 5:  # Don't stop in first 5 epochs to allow learning to stabilize
-            patience_counter = 0
-        elif val_acc > best_val_acc:
-            best_val_acc = val_acc
-            patience_counter = 0
-        else:
-            patience_counter += 1
-            if patience_counter >= patience:
-                logger.info(f"Early stopping triggered after {epoch+1} epochs")
-                break
     
-    # Return final validation metrics
     final_metrics = {
         'val_loss': avg_val_loss,
         'val_accuracy': val_acc,
@@ -413,15 +415,17 @@ def train(model_config=None):
     
     return final_metrics
 
-def plot_experiment_results(results, output_dir="experiment_plots_2"):
-    """Plot the training and validation accuracies for all experiments"""
-    # Create output directory if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
+def plot_experiment_results(results, output_dir="experiment_plots"):
+    """
+    Plot the training and validation metrics for all experiments.
     
-    # Get current timestamp for filenames
+    Args:
+        results: Dictionary mapping experiment names to metrics
+        output_dir: Directory to save plots
+    """
+    os.makedirs(output_dir, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
-    # Plot training and validation accuracies for each experiment
     plt.figure(figsize=(12, 8))
     
     for name, metrics in results.items():
@@ -436,7 +440,6 @@ def plot_experiment_results(results, output_dir="experiment_plots_2"):
     plt.legend(loc='lower right')
     plt.tight_layout()
     
-    # Save the figure
     plt.savefig(f"{output_dir}/accuracy_comparison_{timestamp}.png", dpi=300)
     logging.info(f"Saved accuracy plot to {output_dir}/accuracy_comparison_{timestamp}.png")
     
@@ -455,11 +458,9 @@ def plot_experiment_results(results, output_dir="experiment_plots_2"):
     plt.legend(loc='upper right')
     plt.tight_layout()
     
-    # Save the figure
     plt.savefig(f"{output_dir}/loss_comparison_{timestamp}.png", dpi=300)
     logging.info(f"Saved loss plot to {output_dir}/loss_comparison_{timestamp}.png")
     
-    # Also plot individual experiment metrics for clearer visualization
     for name, metrics in results.items():
         plt.figure(figsize=(10, 6))
         epochs = range(1, len(metrics['all_train_accs']) + 1)
@@ -474,65 +475,52 @@ def plot_experiment_results(results, output_dir="experiment_plots_2"):
         plt.grid(True)
         plt.legend()
         
-        # Save the figure
-        plt.savefig(f"{output_dir}/{name}_accuracy_{timestamp}.png", dpi=300)
-        logging.info(f"Saved {name} accuracy plot to {output_dir}/{name}_accuracy_{timestamp}.png")
+        plt.savefig(f"{output_dir}/{name}accuracy{timestamp}.png", dpi=300)
+        logging.info(f"Saved {name} accuracy plot to {output_dir}/{name}accuracy{timestamp}.png")
 
 if __name__ == "__main__":
-    # Optimize experiments for better accuracy
     experiments = [
-        {"name": "Grayscale_DeepCNN", "grayscale": True, "num_kernels": 64, "num_conv_blocks": 2, 
-         "dropout_rate": 0.5, "use_batch_norm": True},
-        {"name": "RGB_DeepCNN", "grayscale": False, "num_kernels": 64, "num_conv_blocks": 2,
-         "dropout_rate": 0.5, "use_batch_norm": True},
-        {"name": "Grayscale_VeryDeepCNN", "grayscale": True, "num_kernels": 64, "num_conv_blocks": 3,
-         "dropout_rate": 0.6, "use_batch_norm": True},
-        {"name": "RGB_VeryDeepCNN", "grayscale": False, "num_kernels": 64, "num_conv_blocks": 3,
-         "dropout_rate": 0.6, "use_batch_norm": True}
+        {"name": "Grayscale_SimpleCNN", "grayscale": True, "num_kernels": 8, "num_conv_blocks": 1, "use_batchnorm": False},
+        {"name": "RGB_SimpleCNN", "grayscale": False, "num_kernels": 8, "num_conv_blocks": 1, "use_batchnorm": False},
+        {"name": "Grayscale_MultiKernel", "grayscale": True, "num_kernels": 32, "num_conv_blocks": 1, "use_batchnorm": False},
+        {"name": "RGB_DeepCNN", "grayscale": False, "num_kernels": 16, "num_conv_blocks": 3, "use_batchnorm": False},
     ]
 
-    # Results dictionary
     results = {}
 
     for config in experiments:
         logging.info(f"\n======= Starting experiment: {config['name']} =======")
-        # Set up the configuration with moderate optimizations
+
         model_config = {
-            'img_size': 56,  # Increased from 48
+            'img_size': 64,
             'grayscale': config['grayscale'],
             'num_conv_blocks': config['num_conv_blocks'], 
             'num_kernels': config['num_kernels'],
-            'dropout_rate': config['dropout_rate'],
-            'use_batch_norm': config['use_batch_norm']
+            'use_batchnorm': config.get('use_batchnorm', False),
+            'increase_channels': config.get('increase_channels', False)
         }
         
-        # Train and evaluate with this configuration
         metrics = train(model_config)
-        
-        # Store results
         results[config['name']] = metrics
         
         logging.info(f"\n======= Results for {config['name']} =======")
-        logging.info(f"Validation Accuracy: {metrics['val_accuracy']:.2%}")
-        logging.info(f"Validation Loss: {metrics['val_loss']:.4f}")
         logging.info(f"Training Accuracy: {metrics['train_accuracy']:.2%}")
         logging.info(f"Training Loss: {metrics['train_loss']:.4f}")
+        logging.info(f"Validation Accuracy: {metrics['val_accuracy']:.2%}")
+        logging.info(f"Validation Loss: {metrics['val_loss']:.4f}")
         logging.info(f"Epoch Duration: {metrics['epoch_duration']:.2f}s")
         logging.info("="*50)
         
-        # Log more detailed configuration info
         logging.info(f"Configuration details:")
         logging.info(f"  - Image size: {model_config['img_size']}px")
         logging.info(f"  - Image format: {'Grayscale' if model_config['grayscale'] else 'RGB'}")
         logging.info(f"  - CNN depth: {model_config['num_conv_blocks']} convolutional blocks")
         logging.info(f"  - Kernels per layer: {model_config['num_kernels']}")
     
-    # Print summary of all experiments
     logging.info("\n======= EXPERIMENT SUMMARY =======")
     for name, metrics in results.items():
         logging.info(f"{name}: Val Acc={metrics['val_accuracy']:.2%}, Train Acc={metrics['train_accuracy']:.2%}, Time/epoch={sum(metrics['all_epoch_times'])/len(metrics['all_epoch_times']):.2f}s")
     
-    # Generate plots
     logging.info("\n======= Generating visualization plots =======")
     plot_experiment_results(results)
     logging.info("Visualization complete. Plots saved to 'experiment_plots' directory.")

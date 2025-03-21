@@ -2,7 +2,21 @@ import numpy as np
 from framework.Layer import Layer
 
 class BatchNormalizationLayer(Layer):
+    """
+    Batch Normalization layer implementation.
+    
+    Normalizes inputs to have zero mean and unit variance,
+    then applies learnable scale and shift parameters.
+    """
     def __init__(self, input_dim, momentum=0.99, epsilon=1e-8):
+        """
+        Initialize a batch normalization layer.
+        
+        Args:
+            input_dim: Dimensionality of input features
+            momentum: Momentum for running mean and variance updates
+            epsilon: Small constant for numerical stability
+        """
         super().__init__()
         self.input_dim = input_dim
         self.momentum = momentum
@@ -24,9 +38,17 @@ class BatchNormalizationLayer(Layer):
         self.cache = None
     
     def forward(self, x):
+        """
+        Perform batch normalization forward pass.
+        
+        Args:
+            x: Input data with shape (batch_size, input_dim)
+            
+        Returns:
+            Normalized and scaled output with same shape as input
+        """
         self.setPrevIn(x)
         
-        # Different behavior in training vs inference
         if self.training:
             # Calculate batch statistics
             batch_mean = np.mean(x, axis=0)
@@ -51,12 +73,21 @@ class BatchNormalizationLayer(Layer):
         return out
 
     def gradient(self):
-        """Not used directly - backward handles all gradient computation"""
+        """
+        Implementation of abstract method.
+        Not used directly - backward handles all gradient computation.
+        """
         return None
 
     def backward(self, grad_output):
         """
-        Backward pass for batch normalization
+        Backward pass for batch normalization.
+        
+        Args:
+            grad_output: Gradient from next layer
+            
+        Returns:
+            Gradient to pass to previous layer
         """
         # Get cached values
         x_norm, batch_mean, batch_var, x = self.cache
@@ -80,10 +111,14 @@ class BatchNormalizationLayer(Layer):
         return dx
     
     def update_weights(self, learning_rate):
-        """Update gamma and beta parameters"""
+        """
+        Update gamma and beta parameters using computed gradients.
+        
+        Args:
+            learning_rate: Learning rate for parameter updates
+        """
         self.gamma -= learning_rate * self.dgamma
         self.beta -= learning_rate * self.dbeta
         
-        # Reset gradients
         self.dgamma = np.zeros_like(self.gamma)
         self.dbeta = np.zeros_like(self.beta)

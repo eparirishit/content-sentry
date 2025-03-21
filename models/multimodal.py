@@ -2,7 +2,22 @@ import numpy as np
 from framework import FullyConnectedLayer, LogisticSigmoidLayer, ReLULayer
 
 class MultimodalModel:
+    """
+    Multimodal fusion model that combines image and text features.
+    
+    This model takes the outputs of the image and text networks,
+    concatenates them, and performs additional processing to
+    produce a final classification output.
+    """
     def __init__(self, image_model, text_model, use_advanced_fusion=True):
+        """
+        Initialize the multimodal fusion model.
+        
+        Args:
+            image_model: Model for processing image inputs
+            text_model: Model for processing text inputs
+            use_advanced_fusion: Whether to use multi-layer fusion (vs. simple)
+        """
         self.image_model = image_model
         self.text_model = text_model
         
@@ -21,16 +36,28 @@ class MultimodalModel:
         self.use_advanced_fusion = use_advanced_fusion
 
     def train(self):
+        """Set model to training mode."""
         self.training = True
         self.image_model.training = True
         self.text_model.training = True
 
     def eval(self):
+        """Set model to evaluation mode."""
         self.training = False
         self.image_model.training = False
         self.text_model.training = False
 
     def forward(self, image, text):
+        """
+        Perform forward pass through the full multimodal network.
+        
+        Args:
+            image: Image input data
+            text: Text input data
+            
+        Returns:
+            Binary classification probability (0-1)
+        """
         img_feat = self.image_model.forward(image)
         txt_feat = self.text_model.forward(text)
         combined = np.concatenate([img_feat, txt_feat], axis=1)
@@ -46,6 +73,12 @@ class MultimodalModel:
             return self.sigmoid.forward(self.fc.forward(combined))
 
     def backward(self, grad):
+        """
+        Perform backward pass through the full multimodal network.
+        
+        Args:
+            grad: Gradient from loss function
+        """
         grad = self.sigmoid.backward(grad)
         
         if self.use_advanced_fusion:
@@ -60,6 +93,12 @@ class MultimodalModel:
         self.text_model.backward(grad_txt)
 
     def update_weights(self, lr):
+        """
+        Update all weights in the full multimodal network.
+        
+        Args:
+            lr: Learning rate
+        """
         if self.use_advanced_fusion:
             self.fc1.updateWeights(lr)
             self.fc2.updateWeights(lr)
